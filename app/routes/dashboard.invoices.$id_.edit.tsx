@@ -1,0 +1,500 @@
+import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs, type MetaFunction } from "@remix-run/node";
+import { Form, useActionData, useLoaderData, useNavigation, Link } from "@remix-run/react";
+import { Plus, Trash2, Save, ArrowLeft } from "lucide-react";
+import { Button } from "~/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
+import { Select } from "~/components/ui/select";
+import { Textarea } from "~/components/ui/textarea";
+import { requireAuth } from "~/lib/auth.server";
+import { useState } from "react";
+
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+  return [
+    { title: `Edit Invoice ${data?.invoice.invoice_number || ""} - Ledgerly` },
+    { name: "description", content: "Edit invoice" },
+  ];
+};
+
+export async function loader({ request, params }: LoaderFunctionArgs) {
+  const { session, supabase, headers } = await requireAuth(request);
+  const { id } = params;
+
+  if (!id) {
+    throw new Response("Invoice ID required", { status: 400 });
+  }
+
+  const { data: invoice, error } = await supabase
+    .from("invoices")
+    .select("*")
+    .eq("id", id)
+    .eq("user_id", session.user.id)
+    .single();
+
+  if (error || !invoice) {
+    throw new Response("Invoice not found", { status: 404 });
+  }
+
+  return json({
+    invoice,
+    user: session.user,
+  }, { headers });
+}
+
+export async function action({ request, params }: ActionFunctionArgs) {
+  const { session, supabase, headers } = await requireAuth(request);
+  const { id } = params;
+  const formData = await request.formData();
+
+  if (!id) {
+    throw new Response("Invoice ID required", { status: 400 });
+  }
+
+  // Parse form data
+  const invoiceData = {
+    invoice_name: formData.get("invoiceName") as string,
+    invoice_number: formData.get("invoiceNumber") as string,
+    date: formData.get("date") as string,
+    terms: formData.get("terms") as string,
+    status: formData.get("status") as string,
+
+    // From fields
+    from_name: formData.get("fromName") as string || null,
+    from_email: formData.get("fromEmail") as string || null,
+    from_address: formData.get("fromAddress") as string || null,
+    from_phone: formData.get("fromPhone") as string || null,
+    from_business_number: formData.get("fromBusinessNumber") as string || null,
+    from_website: formData.get("fromWebsite") as string || null,
+    from_owner: formData.get("fromOwner") as string || null,
+
+    // Bill To fields
+    bill_to_name: formData.get("billToName") as string || null,
+    bill_to_email: formData.get("billToEmail") as string || null,
+    bill_to_address: formData.get("billToAddress") as string || null,
+    bill_to_phone: formData.get("billToPhone") as string || null,
+    bill_to_mobile: formData.get("billToMobile") as string || null,
+    bill_to_fax: formData.get("billToFax") as string || null,
+
+    // Line items (parsed from JSON)
+    line_items: JSON.parse(formData.get("lineItems") as string || "[]"),
+
+    // Financial fields
+    subtotal: parseFloat(formData.get("subtotal") as string || "0"),
+    total: parseFloat(formData.get("total") as string || "0"),
+    balance_due: parseFloat(formData.get("balanceDue") as string || "0"),
+
+    // Notes
+    notes: formData.get("notes") as string || null,
+  };
+
+  const { error } = await supabase
+    .from("invoices")
+    .update(invoiceData)
+    .eq("id", id)
+    .eq("user_id", session.user.id);
+
+  if (error) {
+    return json({ error: error.message }, { status: 400, headers });
+  }
+
+  return redirect(`/dashboard/invoices/${id}`, { headers });
+}
+
+export default function EditInvoice() {
+  const { invoice } = useLoaderData<typeof loader>();
+  const actionData = useActionData<typeof action>();
+  const navigation = useNavigation();
+  const isSubmitting = navigation.state === "submitting";
+
+  // Initialize line items from the loaded invoice
+  const initialLineItems = Array.isArray(invoice.line_items) && invoice.line_items.length > 0
+    ? invoice.line_items
+    : [{ description: "", rate: "", quantity: "1", amount: "" }];
+
+  const [lineItems, setLineItems] = useState(initialLineItems);
+
+  const addLineItem = () => {
+    setLineItems([...lineItems, { description: "", rate: "", quantity: "1", amount: "" }]);
+  };
+
+  const removeLineItem = (index: number) => {
+    setLineItems(lineItems.filter((_, i) => i !== index));
+  };
+
+  const updateLineItem = (index: number, field: string, value: string) => {
+    const updated = [...lineItems];
+    updated[index] = { ...updated[index], [field]: value };
+
+    // Calculate amount if rate or quantity changes
+    if (field === "rate" || field === "quantity") {
+      const rate = parseFloat(updated[index].rate || "0");
+      const quantity = parseFloat(updated[index].quantity || "1");
+      updated[index].amount = (rate * quantity).toFixed(2);
+    }
+
+    setLineItems(updated);
+  };
+
+  // Calculate totals
+  const subtotal = lineItems.reduce((sum, item) => {
+    return sum + parseFloat(item.amount || "0");
+  }, 0);
+  const total = subtotal;
+  const balanceDue = total;
+
+  return (
+    <div className="container mx-auto space-y-6 p-6">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Link to={`/dashboard/invoices/${invoice.id}`}>
+            <Button variant="ghost" size="icon">
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-3xl font-bold">Edit Invoice</h1>
+            <p className="text-muted-foreground">
+              Update your invoice details
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <Form method="post" className="space-y-6">
+        {actionData?.error && (
+          <div className="rounded-md bg-destructive/15 p-3 text-sm text-destructive">
+            {actionData.error}
+          </div>
+        )}
+
+        {/* Invoice Name */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Invoice Details</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="invoiceName">Invoice Name</Label>
+              <Input
+                id="invoiceName"
+                name="invoiceName"
+                placeholder="e.g., Website Development - Client Name"
+                defaultValue={invoice.invoice_name}
+                required
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* From Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle>From</CardTitle>
+            <CardDescription>Your business information</CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="fromName">Name</Label>
+              <Input
+                id="fromName"
+                name="fromName"
+                defaultValue={invoice.from_name || ""}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="fromEmail">Email</Label>
+              <Input
+                id="fromEmail"
+                name="fromEmail"
+                type="email"
+                defaultValue={invoice.from_email || ""}
+              />
+            </div>
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="fromAddress">Address</Label>
+              <Input
+                id="fromAddress"
+                name="fromAddress"
+                defaultValue={invoice.from_address || ""}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="fromPhone">Phone</Label>
+              <Input
+                id="fromPhone"
+                name="fromPhone"
+                defaultValue={invoice.from_phone || ""}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="fromBusinessNumber">Business Number</Label>
+              <Input
+                id="fromBusinessNumber"
+                name="fromBusinessNumber"
+                defaultValue={invoice.from_business_number || ""}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="fromWebsite">Website</Label>
+              <Input
+                id="fromWebsite"
+                name="fromWebsite"
+                defaultValue={invoice.from_website || ""}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="fromOwner">Owner</Label>
+              <Input
+                id="fromOwner"
+                name="fromOwner"
+                defaultValue={invoice.from_owner || ""}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Bill To Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Bill To</CardTitle>
+            <CardDescription>Client information</CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="billToName">Name</Label>
+              <Input
+                id="billToName"
+                name="billToName"
+                defaultValue={invoice.bill_to_name || ""}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="billToEmail">Email</Label>
+              <Input
+                id="billToEmail"
+                name="billToEmail"
+                type="email"
+                defaultValue={invoice.bill_to_email || ""}
+              />
+            </div>
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="billToAddress">Address</Label>
+              <Input
+                id="billToAddress"
+                name="billToAddress"
+                defaultValue={invoice.bill_to_address || ""}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="billToPhone">Phone</Label>
+              <Input
+                id="billToPhone"
+                name="billToPhone"
+                defaultValue={invoice.bill_to_phone || ""}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="billToMobile">Mobile</Label>
+              <Input
+                id="billToMobile"
+                name="billToMobile"
+                defaultValue={invoice.bill_to_mobile || ""}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="billToFax">Fax</Label>
+              <Input
+                id="billToFax"
+                name="billToFax"
+                defaultValue={invoice.bill_to_fax || ""}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Invoice Number, Date, Terms, Status */}
+        <Card>
+          <CardContent className="grid gap-4 pt-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="space-y-2">
+              <Label htmlFor="invoiceNumber">Invoice Number</Label>
+              <Input
+                id="invoiceNumber"
+                name="invoiceNumber"
+                defaultValue={invoice.invoice_number}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="date">Date</Label>
+              <Input
+                id="date"
+                name="date"
+                type="date"
+                defaultValue={invoice.date}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="terms">Terms</Label>
+              <Select id="terms" name="terms" defaultValue={invoice.terms} required>
+                <option value="none">No Terms</option>
+                <option value="on_receipt">On Receipt</option>
+                <option value="1_day">Next Day</option>
+                <option value="2_days">2 Days</option>
+                <option value="3_days">3 Days</option>
+                <option value="5_days">5 Days</option>
+                <option value="7_days">7 Days</option>
+                <option value="14_days">14 Days</option>
+                <option value="30_days">30 Days</option>
+                <option value="custom">Custom</option>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="status">Status</Label>
+              <Select id="status" name="status" defaultValue={invoice.status} required>
+                <option value="draft">Draft</option>
+                <option value="sent">Sent</option>
+                <option value="paid">Paid</option>
+                <option value="overdue">Overdue</option>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Line Items */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Line Items</CardTitle>
+                <CardDescription>Add items or services</CardDescription>
+              </div>
+              <Button type="button" variant="outline" size="sm" onClick={addLineItem}>
+                <Plus className="mr-2 h-4 w-4" />
+                Add Line Item
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {lineItems.map((item, index) => (
+              <div key={index} className="grid gap-4 rounded-lg border p-4 md:grid-cols-12">
+                <div className="md:col-span-5 space-y-2">
+                  <Label>Description</Label>
+                  <Input
+                    value={item.description}
+                    onChange={(e) => updateLineItem(index, "description", e.target.value)}
+                    placeholder="Item or service description"
+                  />
+                </div>
+                <div className="md:col-span-2 space-y-2">
+                  <Label>Rate</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={item.rate}
+                    onChange={(e) => updateLineItem(index, "rate", e.target.value)}
+                    placeholder="0.00"
+                  />
+                </div>
+                <div className="md:col-span-2 space-y-2">
+                  <Label>Quantity</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={item.quantity}
+                    onChange={(e) => updateLineItem(index, "quantity", e.target.value)}
+                    placeholder="1"
+                  />
+                </div>
+                <div className="md:col-span-2 space-y-2">
+                  <Label>Amount</Label>
+                  <Input
+                    value={item.amount}
+                    readOnly
+                    className="bg-muted"
+                  />
+                </div>
+                <div className="md:col-span-1 flex items-end">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => removeLineItem(index)}
+                    disabled={lineItems.length === 1}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+
+            {/* Hidden input for line items - key forces re-render when state changes */}
+            <input
+              key={JSON.stringify(lineItems)}
+              type="hidden"
+              name="lineItems"
+              value={JSON.stringify(lineItems)}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Summary */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Summary</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Subtotal:</span>
+              <span className="font-medium">${subtotal.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between border-t pt-3 text-lg font-semibold">
+              <span>Total:</span>
+              <span>${total.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between text-lg font-semibold text-primary">
+              <span>Balance Due:</span>
+              <span>${balanceDue.toFixed(2)}</span>
+            </div>
+
+            {/* Hidden inputs for totals */}
+            <input type="hidden" name="subtotal" value={subtotal} />
+            <input type="hidden" name="total" value={total} />
+            <input type="hidden" name="balanceDue" value={balanceDue} />
+          </CardContent>
+        </Card>
+
+        {/* Notes */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Notes</CardTitle>
+            <CardDescription>Additional information or payment instructions</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Textarea
+              name="notes"
+              placeholder="Payment is requested via Direct Deposit (using the account information provided) or via Zelle to the provided email address. Thank you!"
+              rows={4}
+              defaultValue={invoice.notes || ""}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Actions */}
+        <div className="flex justify-end gap-4">
+          <Link to={`/dashboard/invoices/${invoice.id}`}>
+            <Button type="button" variant="outline" disabled={isSubmitting}>
+              Cancel
+            </Button>
+          </Link>
+          <Button type="submit" disabled={isSubmitting}>
+            <Save className="mr-2 h-4 w-4" />
+            {isSubmitting ? "Saving..." : "Save Changes"}
+          </Button>
+        </div>
+      </Form>
+    </div>
+  );
+}
