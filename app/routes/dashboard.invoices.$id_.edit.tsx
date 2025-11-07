@@ -8,6 +8,7 @@ import { Label } from "~/components/ui/label";
 import { Select } from "~/components/ui/select";
 import { Textarea } from "~/components/ui/textarea";
 import { requireAuth } from "~/lib/auth.server";
+import { formatCurrency } from "~/lib/utils";
 import { useState } from "react";
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
@@ -448,15 +449,15 @@ export default function EditInvoice() {
           <CardContent className="space-y-3">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Subtotal:</span>
-              <span className="font-medium">${subtotal.toFixed(2)}</span>
+              <span className="font-medium">${formatCurrency(subtotal)}</span>
             </div>
             <div className="flex justify-between border-t pt-3 text-lg font-semibold">
               <span>Total:</span>
-              <span>${total.toFixed(2)}</span>
+              <span>${formatCurrency(total)}</span>
             </div>
             <div className="flex justify-between text-lg font-semibold text-primary">
               <span>Balance Due:</span>
-              <span>${balanceDue.toFixed(2)}</span>
+              <span>${formatCurrency(balanceDue)}</span>
             </div>
 
             {/* Hidden inputs for totals */}

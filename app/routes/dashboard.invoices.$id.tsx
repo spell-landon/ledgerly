@@ -7,8 +7,10 @@ import { Badge } from "~/components/ui/badge";
 import { Select } from "~/components/ui/select";
 import { Label } from "~/components/ui/label";
 import { requireAuth } from "~/lib/auth.server";
+import { formatCurrency } from "~/lib/utils";
 import { useState } from "react";
 import { sendInvoiceEmail } from "~/lib/email.server";
+import { formatCurrency } from "~/lib/utils";
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
   return [
@@ -373,13 +375,13 @@ export default function InvoiceDetail() {
                     <tr key={index}>
                       <td className="px-4 py-3 text-sm">{item.description}</td>
                       <td className="px-4 py-3 text-right text-sm">
-                        ${parseFloat(item.rate || 0).toFixed(2)}
+                        ${formatCurrency(parseFloat(item.rate || 0))}
                       </td>
                       <td className="px-4 py-3 text-right text-sm">
                         {parseFloat(item.quantity || 0).toFixed(2)}
                       </td>
                       <td className="px-4 py-3 text-right text-sm font-medium">
-                        ${parseFloat(item.amount || 0).toFixed(2)}
+                        ${formatCurrency(parseFloat(item.amount || 0))}
                       </td>
                     </tr>
                   ))}
@@ -393,15 +395,15 @@ export default function InvoiceDetail() {
             <div className="w-full max-w-xs space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Subtotal:</span>
-                <span className="font-medium">${invoice.subtotal.toFixed(2)}</span>
+                <span className="font-medium">${formatCurrency(invoice.subtotal)}</span>
               </div>
               <div className="flex justify-between border-t pt-2 text-lg font-semibold">
                 <span>Total:</span>
-                <span>${invoice.total.toFixed(2)}</span>
+                <span>${formatCurrency(invoice.total)}</span>
               </div>
               <div className="flex justify-between text-lg font-semibold text-primary">
                 <span>Balance Due:</span>
-                <span>${invoice.balance_due.toFixed(2)}</span>
+                <span>${formatCurrency(invoice.balance_due)}</span>
               </div>
             </div>
           </div>

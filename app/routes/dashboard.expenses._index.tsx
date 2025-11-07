@@ -6,6 +6,7 @@ import { Card, CardContent } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Badge } from "~/components/ui/badge";
 import { requireAuth } from "~/lib/auth.server";
+import { formatCurrency } from "~/lib/utils";
 
 export const meta: MetaFunction = () => {
   return [
@@ -78,22 +79,21 @@ export default function ExpensesIndex() {
         <Card>
           <CardContent className="p-4 md:p-6">
             <div className="text-sm font-medium text-muted-foreground">Total Expenses</div>
-            <div className="text-2xl font-bold md:text-3xl">${totalExpenses.toFixed(2)}</div>
+            <div className="text-2xl font-bold md:text-3xl">${formatCurrency(totalExpenses)}</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 md:p-6">
             <div className="text-sm font-medium text-muted-foreground">This Month</div>
             <div className="text-2xl font-bold md:text-3xl">
-              ${expenses
+              ${formatCurrency(expenses
                 .filter(e => {
                   const expenseDate = new Date(e.date);
                   const now = new Date();
                   return expenseDate.getMonth() === now.getMonth() &&
                          expenseDate.getFullYear() === now.getFullYear();
                 })
-                .reduce((sum, e) => sum + (e.amount || 0), 0)
-                .toFixed(2)}
+                .reduce((sum, e) => sum + (e.amount || 0), 0))}
             </div>
           </CardContent>
         </Card>
@@ -188,7 +188,7 @@ export default function ExpensesIndex() {
                         {getCategoryBadge(expense.category)}
                       </td>
                       <td className="px-4 py-3 text-xs font-medium md:px-6 md:py-4 md:text-sm">
-                        ${expense.amount.toFixed(2)}
+                        ${formatCurrency(expense.amount)}
                       </td>
                       <td className="px-4 py-3 text-right md:px-6 md:py-4">
                         <div className="flex items-center justify-end gap-1 md:gap-2">

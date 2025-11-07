@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/com
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { requireAuth } from "~/lib/auth.server";
+import { formatCurrency } from "~/lib/utils";
 
 export const meta: MetaFunction = () => {
   return [
@@ -132,7 +133,7 @@ export default function Reports() {
 
   const exportToCSV = () => {
     const csvData = monthlyData.map(m =>
-      `${m.month},${m.income.toFixed(2)},${m.expenses.toFixed(2)},${m.profit.toFixed(2)}`
+      `${m.month},${formatCurrency(m.income)},${formatCurrency(m.expenses)},${formatCurrency(m.profit)}`
     ).join('\n');
 
     const csv = `Month,Income,Expenses,Profit\n${csvData}`;
@@ -202,10 +203,10 @@ export default function Reports() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
-              ${stats.totalIncome.toFixed(2)}
+              ${formatCurrency(stats.totalIncome)}
             </div>
             <p className="text-xs text-muted-foreground">
-              Avg: ${stats.averageInvoice.toFixed(2)} per invoice
+              Avg: ${formatCurrency(stats.averageInvoice)} per invoice
             </p>
           </CardContent>
         </Card>
@@ -217,10 +218,10 @@ export default function Reports() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">
-              ${stats.totalExpenses.toFixed(2)}
+              ${formatCurrency(stats.totalExpenses)}
             </div>
             <p className="text-xs text-muted-foreground">
-              Avg: ${stats.averageExpense.toFixed(2)} per expense
+              Avg: ${formatCurrency(stats.averageExpense)} per expense
             </p>
           </CardContent>
         </Card>
@@ -236,7 +237,7 @@ export default function Reports() {
           </CardHeader>
           <CardContent>
             <div className={`text-2xl font-bold ${stats.netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              ${stats.netProfit.toFixed(2)}
+              ${formatCurrency(stats.netProfit)}
             </div>
             <p className="text-xs text-muted-foreground">
               Income - Expenses
@@ -251,7 +252,7 @@ export default function Reports() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-orange-600">
-              ${stats.totalPending.toFixed(2)}
+              ${formatCurrency(stats.totalPending)}
             </div>
             <p className="text-xs text-muted-foreground">
               Unpaid invoices
@@ -281,16 +282,16 @@ export default function Reports() {
                     <div className="grid grid-cols-3 gap-2 text-sm">
                       <div>
                         <p className="text-xs text-muted-foreground">Income</p>
-                        <p className="font-semibold text-green-600">${month.income.toFixed(2)}</p>
+                        <p className="font-semibold text-green-600">${formatCurrency(month.income)}</p>
                       </div>
                       <div>
                         <p className="text-xs text-muted-foreground">Expenses</p>
-                        <p className="font-semibold text-red-600">${month.expenses.toFixed(2)}</p>
+                        <p className="font-semibold text-red-600">${formatCurrency(month.expenses)}</p>
                       </div>
                       <div>
                         <p className="text-xs text-muted-foreground">Profit</p>
                         <p className={`font-bold ${month.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                          ${month.profit.toFixed(2)}
+                          ${formatCurrency(month.profit)}
                         </p>
                       </div>
                     </div>
@@ -303,16 +304,16 @@ export default function Reports() {
                   <div className="grid grid-cols-3 gap-2 text-sm">
                     <div>
                       <p className="text-xs text-muted-foreground">Income</p>
-                      <p className="font-bold text-green-600">${stats.totalIncome.toFixed(2)}</p>
+                      <p className="font-bold text-green-600">${formatCurrency(stats.totalIncome)}</p>
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground">Expenses</p>
-                      <p className="font-bold text-red-600">${stats.totalExpenses.toFixed(2)}</p>
+                      <p className="font-bold text-red-600">${formatCurrency(stats.totalExpenses)}</p>
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground">Profit</p>
                       <p className={`font-bold ${stats.netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        ${stats.netProfit.toFixed(2)}
+                        ${formatCurrency(stats.netProfit)}
                       </p>
                     </div>
                   </div>
@@ -335,13 +336,13 @@ export default function Reports() {
                       <tr key={month.month} className="hover:bg-muted/50">
                         <td className="px-4 py-3 font-medium">{month.month}</td>
                         <td className="px-4 py-3 text-right text-green-600">
-                          ${month.income.toFixed(2)}
+                          ${formatCurrency(month.income)}
                         </td>
                         <td className="px-4 py-3 text-right text-red-600">
-                          ${month.expenses.toFixed(2)}
+                          ${formatCurrency(month.expenses)}
                         </td>
                         <td className={`px-4 py-3 text-right font-semibold ${month.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                          ${month.profit.toFixed(2)}
+                          ${formatCurrency(month.profit)}
                         </td>
                       </tr>
                     ))}
@@ -350,13 +351,13 @@ export default function Reports() {
                     <tr>
                       <td className="px-4 py-3">Total</td>
                       <td className="px-4 py-3 text-right text-green-600">
-                        ${stats.totalIncome.toFixed(2)}
+                        ${formatCurrency(stats.totalIncome)}
                       </td>
                       <td className="px-4 py-3 text-right text-red-600">
-                        ${stats.totalExpenses.toFixed(2)}
+                        ${formatCurrency(stats.totalExpenses)}
                       </td>
                       <td className={`px-4 py-3 text-right ${stats.netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        ${stats.netProfit.toFixed(2)}
+                        ${formatCurrency(stats.netProfit)}
                       </td>
                     </tr>
                   </tfoot>
@@ -385,7 +386,7 @@ export default function Reports() {
                 <div className="text-right">
                   <p className="font-semibold">{invoicesByStatus.paid.length}</p>
                   <p className="text-xs text-muted-foreground">
-                    ${invoicesByStatus.paid.reduce((sum, inv) => sum + inv.total, 0).toFixed(2)}
+                    ${formatCurrency(invoicesByStatus.paid.reduce((sum, inv) => sum + inv.total, 0))}
                   </p>
                 </div>
               </div>
@@ -398,7 +399,7 @@ export default function Reports() {
                 <div className="text-right">
                   <p className="font-semibold">{invoicesByStatus.sent.length}</p>
                   <p className="text-xs text-muted-foreground">
-                    ${invoicesByStatus.sent.reduce((sum, inv) => sum + inv.total, 0).toFixed(2)}
+                    ${formatCurrency(invoicesByStatus.sent.reduce((sum, inv) => sum + inv.total, 0))}
                   </p>
                 </div>
               </div>
@@ -411,7 +412,7 @@ export default function Reports() {
                 <div className="text-right">
                   <p className="font-semibold">{invoicesByStatus.draft.length}</p>
                   <p className="text-xs text-muted-foreground">
-                    ${invoicesByStatus.draft.reduce((sum, inv) => sum + inv.total, 0).toFixed(2)}
+                    ${formatCurrency(invoicesByStatus.draft.reduce((sum, inv) => sum + inv.total, 0))}
                   </p>
                 </div>
               </div>
@@ -424,7 +425,7 @@ export default function Reports() {
                 <div className="text-right">
                   <p className="font-semibold">{invoicesByStatus.overdue.length}</p>
                   <p className="text-xs text-muted-foreground">
-                    ${invoicesByStatus.overdue.reduce((sum, inv) => sum + inv.total, 0).toFixed(2)}
+                    ${formatCurrency(invoicesByStatus.overdue.reduce((sum, inv) => sum + inv.total, 0))}
                   </p>
                 </div>
               </div>
@@ -454,7 +455,7 @@ export default function Reports() {
                         <p className="text-xs text-muted-foreground">{data.count} expense{data.count !== 1 ? 's' : ''}</p>
                       </div>
                       <div className="text-right">
-                        <p className="font-semibold">${data.total.toFixed(2)}</p>
+                        <p className="font-semibold">${formatCurrency(data.total)}</p>
                         <p className="text-xs text-muted-foreground">
                           {((data.total / stats.totalExpenses) * 100).toFixed(1)}%
                         </p>

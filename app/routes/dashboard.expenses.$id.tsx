@@ -4,6 +4,7 @@ import { ArrowLeft, Edit, Trash2, Download, FileText } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import { requireAuth } from "~/lib/auth.server";
+import { formatCurrency } from "~/lib/utils";
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
   return [
@@ -159,7 +160,7 @@ export default function ExpenseDetail() {
             <div className="space-y-4">
               <div>
                 <p className="text-sm text-muted-foreground">Amount</p>
-                <p className="text-3xl font-bold text-primary">${expense.amount.toFixed(2)}</p>
+                <p className="text-3xl font-bold text-primary">${formatCurrency(expense.amount)}</p>
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">

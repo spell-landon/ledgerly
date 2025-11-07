@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/com
 import { Input } from "~/components/ui/input";
 import { Badge } from "~/components/ui/badge";
 import { requireAuth } from "~/lib/auth.server";
+import { formatCurrency } from "~/lib/utils";
 
 export const meta: MetaFunction = () => {
   return [
@@ -127,7 +128,7 @@ export default function InvoicesIndex() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-xs text-muted-foreground">Amount</p>
-                        <p className="text-lg font-bold">${invoice.total.toFixed(2)}</p>
+                        <p className="text-lg font-bold">${formatCurrency(invoice.total)}</p>
                       </div>
                       <div className="text-right">
                         <p className="text-xs text-muted-foreground">Date</p>
@@ -223,7 +224,7 @@ export default function InvoicesIndex() {
                           {new Date(invoice.date).toLocaleDateString()}
                         </td>
                         <td className="px-6 py-4 text-sm font-medium">
-                          ${invoice.total.toFixed(2)}
+                          ${formatCurrency(invoice.total)}
                         </td>
                         <td className="px-6 py-4">
                           {getStatusBadge(invoice.status)}

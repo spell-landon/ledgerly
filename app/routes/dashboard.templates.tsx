@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/com
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { requireAuth } from "~/lib/auth.server";
+import { formatCurrency } from "~/lib/utils";
 import { useState } from "react";
 
 export const meta: MetaFunction = () => {
@@ -333,7 +334,7 @@ export default function Templates() {
                   <CardContent className="space-y-3">
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Rate:</span>
-                      <span className="font-semibold">${parseFloat(template.rate).toFixed(2)}</span>
+                      <span className="font-semibold">${formatCurrency(parseFloat(template.rate))}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Quantity:</span>
@@ -342,7 +343,7 @@ export default function Templates() {
                     <div className="flex justify-between border-t pt-2 text-sm">
                       <span className="text-muted-foreground">Amount:</span>
                       <span className="font-bold text-primary">
-                        ${(parseFloat(template.rate) * parseFloat(template.quantity)).toFixed(2)}
+                        ${formatCurrency((parseFloat(template.rate) * parseFloat(template.quantity)))}
                       </span>
                     </div>
 

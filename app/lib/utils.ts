@@ -4,3 +4,15 @@ import { twMerge } from "tailwind-merge"
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
+
+/**
+ * Format a number as currency with commas and 2 decimal places
+ * @param amount - The number to format
+ * @returns Formatted currency string (e.g., "7,500.00")
+ */
+export function formatCurrency(amount: number): string {
+  return new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount);
+}

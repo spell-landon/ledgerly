@@ -5,6 +5,7 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
 import { requireAuth } from "~/lib/auth.server";
+import { formatCurrency } from "~/lib/utils";
 
 export const meta: MetaFunction = () => {
   return [
@@ -146,7 +147,7 @@ export default function DashboardIndex() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              ${stats.currentMonthIncome.toFixed(2)}
+              ${formatCurrency(stats.currentMonthIncome)}
             </div>
             <div className="flex items-center gap-1 text-xs">
               {stats.incomeChange >= 0 ? (
@@ -172,7 +173,7 @@ export default function DashboardIndex() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              ${stats.currentMonthExpensesAmount.toFixed(2)}
+              ${formatCurrency(stats.currentMonthExpensesAmount)}
             </div>
             <div className="flex items-center gap-1 text-xs">
               {stats.expensesChange >= 0 ? (
@@ -198,7 +199,7 @@ export default function DashboardIndex() {
           </CardHeader>
           <CardContent>
             <div className={`text-2xl font-bold ${stats.netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              ${stats.netProfit.toFixed(2)}
+              ${formatCurrency(stats.netProfit)}
             </div>
             <p className="text-xs text-muted-foreground">
               All time income - expenses
@@ -236,7 +237,7 @@ export default function DashboardIndex() {
             <CardTitle className="text-sm font-medium text-muted-foreground">Total Income</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${stats.totalIncome.toFixed(2)}</div>
+            <div className="text-2xl font-bold">${formatCurrency(stats.totalIncome)}</div>
           </CardContent>
         </Card>
 
@@ -245,7 +246,7 @@ export default function DashboardIndex() {
             <CardTitle className="text-sm font-medium text-muted-foreground">Total Expenses</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${stats.totalExpensesAmount.toFixed(2)}</div>
+            <div className="text-2xl font-bold">${formatCurrency(stats.totalExpensesAmount)}</div>
           </CardContent>
         </Card>
       </div>
@@ -290,7 +291,7 @@ export default function DashboardIndex() {
                     </div>
                     <div className="flex items-center gap-3 ml-2">
                       <div className="text-right">
-                        <p className="font-semibold">${invoice.total.toFixed(2)}</p>
+                        <p className="font-semibold">${formatCurrency(invoice.total)}</p>
                       </div>
                       {getStatusBadge(invoice.status)}
                     </div>
@@ -338,7 +339,7 @@ export default function DashboardIndex() {
                       </p>
                     </div>
                     <div className="text-right ml-2">
-                      <p className="font-semibold">${expense.amount.toFixed(2)}</p>
+                      <p className="font-semibold">${formatCurrency(expense.amount)}</p>
                       <p className="text-xs text-muted-foreground capitalize">{expense.category}</p>
                     </div>
                   </Link>

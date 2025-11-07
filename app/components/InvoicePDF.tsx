@@ -1,4 +1,5 @@
 import { Document, Page, Text, View, StyleSheet, Font } from "@react-pdf/renderer";
+import { formatCurrency } from "~/lib/utils";
 
 // Define styles
 const styles = StyleSheet.create({
@@ -232,13 +233,13 @@ export function InvoicePDF({ invoice }: InvoicePDFProps) {
             <View key={index} style={styles.tableRow}>
               <Text style={[styles.tableCell, styles.descriptionCol]}>{item.description}</Text>
               <Text style={[styles.tableCell, styles.rateCol]}>
-                ${parseFloat(item.rate || 0).toFixed(2)}
+                ${formatCurrency(parseFloat(item.rate || 0))}
               </Text>
               <Text style={[styles.tableCell, styles.qtyCol]}>
                 {parseFloat(item.quantity || 0).toFixed(2)}
               </Text>
               <Text style={[styles.tableCell, styles.amountCol]}>
-                ${parseFloat(item.amount || 0).toFixed(2)}
+                ${formatCurrency(parseFloat(item.amount || 0))}
               </Text>
             </View>
           ))}
@@ -248,17 +249,17 @@ export function InvoicePDF({ invoice }: InvoicePDFProps) {
         <View style={styles.totalsSection}>
           <View style={styles.totalRow}>
             <Text style={styles.totalLabel}>Subtotal:</Text>
-            <Text style={styles.totalValue}>${invoice.subtotal.toFixed(2)}</Text>
+            <Text style={styles.totalValue}>${formatCurrency(invoice.subtotal)}</Text>
           </View>
 
           <View style={styles.grandTotalRow}>
             <Text style={styles.grandTotalLabel}>Total:</Text>
-            <Text style={styles.grandTotalValue}>${invoice.total.toFixed(2)}</Text>
+            <Text style={styles.grandTotalValue}>${formatCurrency(invoice.total)}</Text>
           </View>
 
           <View style={styles.balanceDueRow}>
             <Text style={styles.balanceDueLabel}>Balance Due:</Text>
-            <Text style={styles.balanceDueValue}>${invoice.balance_due.toFixed(2)}</Text>
+            <Text style={styles.balanceDueValue}>${formatCurrency(invoice.balance_due)}</Text>
           </View>
         </View>
 
