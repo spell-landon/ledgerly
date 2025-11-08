@@ -211,7 +211,7 @@ export default function InvoiceDetail() {
   };
 
   return (
-    <div className="container mx-auto space-y-6 p-6">
+    <div className="container mx-auto space-y-4 p-3 md:space-y-6 md:p-6">
       {/* Success/Error Messages */}
       {actionData?.success && (
         <div className="rounded-md bg-green-50 p-3 text-sm text-green-800 dark:bg-green-900/20 dark:text-green-300">

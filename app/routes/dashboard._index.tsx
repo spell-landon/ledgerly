@@ -174,17 +174,17 @@ export default function DashboardIndex() {
     useLoaderData<typeof loader>();
 
   return (
-    <div className='container mx-auto space-y-2 md:space-y-4 p-4 md:space-y-6 md:p-6'>
+    <div className='container mx-auto space-y-4 p-4 md:space-y-6 md:p-6'>
       {/* Welcome Section */}
       <div>
-        <h1 className='text-xl font-bold md:text-3xl'>Welcome back!</h1>
-        <p className='text-xs text-muted-foreground md:text-base'>
+        <h1 className='text-2xl font-bold md:text-3xl'>Welcome back!</h1>
+        <p className='text-sm text-muted-foreground md:text-base'>
           Here's an overview of your business finances
         </p>
       </div>
 
       {/* Main Stats Cards */}
-      <div className='grid grid-cols-2 gap-2 sm:grid-cols-2 md:gap-4 lg:grid-cols-4'>
+      <div className='grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4'>
         <Card>
           <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
             <CardTitle className='text-sm font-medium'>

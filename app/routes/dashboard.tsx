@@ -116,7 +116,7 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className='flex h-screen w-full flex-col overflow-hidden bg-gray-100 md:flex-row dark:bg-neutral-800'>
+    <div className='flex h-[100dvh] w-full flex-col overflow-hidden bg-gray-100 md:h-screen md:flex-row dark:bg-neutral-800'>
       <Sidebar open={open} setOpen={setOpen} animate={mounted}>
         <SidebarBody className='justify-between gap-10'>
           <div className='flex flex-1 flex-col overflow-x-hidden overflow-y-auto'>

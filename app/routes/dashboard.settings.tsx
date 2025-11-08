@@ -88,7 +88,7 @@ export default function Settings() {
   const isSubmitting = navigation.state === "submitting";
 
   return (
-    <div className="container mx-auto space-y-6 p-6">
+    <div className="container mx-auto space-y-4 p-4 md:space-y-6 md:p-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

@@ -179,7 +179,7 @@ export default function NewInvoice() {
   const today = new Date().toISOString().split("T")[0];
 
   return (
-    <div className="container mx-auto space-y-6 p-6">
+    <div className="container mx-auto space-y-4 p-4 md:space-y-6 md:p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Create New Invoice</h1>
