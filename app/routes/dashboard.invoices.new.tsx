@@ -355,6 +355,7 @@ export default function NewInvoice() {
                 type="date"
                 defaultValue={today}
                 required
+                className="min-w-0"
               />
             </div>
             <div className="space-y-2">

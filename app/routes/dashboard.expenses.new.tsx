@@ -159,6 +159,7 @@ export default function NewExpense() {
                   type="date"
                   defaultValue={today}
                   required
+                  className="min-w-0"
                 />
               </div>
 

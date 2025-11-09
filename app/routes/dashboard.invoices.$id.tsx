@@ -385,27 +385,27 @@ export default function InvoiceDetail() {
 
           {/* Line Items */}
           <div className="mb-8">
-            <div className="overflow-hidden rounded-lg border">
+            <div className="overflow-x-auto rounded-lg border">
               <table className="w-full">
                 <thead className="bg-muted/50">
                   <tr>
-                    <th className="px-4 py-3 text-left text-sm font-semibold">Description</th>
-                    <th className="px-4 py-3 text-right text-sm font-semibold">Rate</th>
-                    <th className="px-4 py-3 text-right text-sm font-semibold">Qty</th>
-                    <th className="px-4 py-3 text-right text-sm font-semibold">Amount</th>
+                    <th className="px-3 py-2 text-left text-xs font-semibold md:px-4 md:py-3 md:text-sm">Description</th>
+                    <th className="px-3 py-2 text-right text-xs font-semibold whitespace-nowrap md:px-4 md:py-3 md:text-sm">Rate</th>
+                    <th className="px-3 py-2 text-right text-xs font-semibold whitespace-nowrap md:px-4 md:py-3 md:text-sm">Qty</th>
+                    <th className="px-3 py-2 text-right text-xs font-semibold whitespace-nowrap md:px-4 md:py-3 md:text-sm">Amount</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y">
                   {lineItems.map((item: any, index: number) => (
                     <tr key={index}>
-                      <td className="px-4 py-3 text-sm">{item.description}</td>
-                      <td className="px-4 py-3 text-right text-sm">
+                      <td className="px-3 py-2 text-xs md:px-4 md:py-3 md:text-sm">{item.description}</td>
+                      <td className="px-3 py-2 text-right text-xs whitespace-nowrap md:px-4 md:py-3 md:text-sm">
                         ${formatCurrency(parseFloat(item.rate || 0))}
                       </td>
-                      <td className="px-4 py-3 text-right text-sm">
+                      <td className="px-3 py-2 text-right text-xs whitespace-nowrap md:px-4 md:py-3 md:text-sm">
                         {parseFloat(item.quantity || 0).toFixed(2)}
                       </td>
-                      <td className="px-4 py-3 text-right text-sm font-medium">
+                      <td className="px-3 py-2 text-right text-xs font-medium whitespace-nowrap md:px-4 md:py-3 md:text-sm">
                         ${formatCurrency(parseFloat(item.amount || 0))}
                       </td>
                     </tr>
@@ -483,6 +483,7 @@ export default function InvoiceDetail() {
                   type="date"
                   defaultValue={invoice.payment_date || ""}
                   disabled={isUpdatingPayment}
+                  className="min-w-0"
                 />
               </div>
               <div className="space-y-2">

@@ -118,6 +118,7 @@ export default function EditMileage() {
                   defaultValue={mileage.date}
                   required
                   disabled={isSubmitting}
+                  className="min-w-0"
                 />
               </div>
 

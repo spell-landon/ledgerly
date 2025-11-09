@@ -99,6 +99,7 @@ export default function NewMileage() {
                   defaultValue={today}
                   required
                   disabled={isSubmitting}
+                  className="min-w-0"
                 />
               </div>
 

@@ -203,6 +203,7 @@ export default function EditExpense() {
                   defaultValue={expense.date}
                   required
                   disabled={isSubmitting}
+                  className="min-w-0"
                 />
               </div>
 

@@ -1,0 +1,6 @@
+- fix date width on mobile
+- fix menu height on mobile
+- fix invoice width and line item table on mobile
+- fix react screen zooming in on mobile when clicking on input field
+- set font pairing with “Gibson”(?)
+- convert to React Native

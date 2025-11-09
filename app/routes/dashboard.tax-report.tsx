@@ -167,6 +167,7 @@ export default function TaxReport() {
                 type="date"
                 value={startDate}
                 onChange={(e) => handleDateChange("startDate", e.target.value)}
+                className="min-w-0"
               />
             </div>
             <div className="space-y-2">
@@ -176,6 +177,7 @@ export default function TaxReport() {
                 type="date"
                 value={endDate}
                 onChange={(e) => handleDateChange("endDate", e.target.value)}
+                className="min-w-0"
               />
             </div>
           </div>

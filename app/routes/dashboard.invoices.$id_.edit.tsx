@@ -344,6 +344,7 @@ export default function EditInvoice() {
                 type="date"
                 defaultValue={invoice.date}
                 required
+                className="min-w-0"
               />
             </div>
             <div className="space-y-2">
