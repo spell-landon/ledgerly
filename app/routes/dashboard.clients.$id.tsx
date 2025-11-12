@@ -284,7 +284,7 @@ export default function ClientDetail() {
               </div>
 
               <div className='pt-3 border-t'>
-                <Link to={`/dashboard/invoices?client=${client.name}`}>
+                <Link to={`/dashboard/invoices?q=${encodeURIComponent(client.name)}`}>
                   <Button variant='outline' className='w-full'>
                     View Invoices
                   </Button>

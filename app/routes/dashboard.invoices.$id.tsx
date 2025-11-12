@@ -373,7 +373,14 @@ export default function InvoiceDetail() {
             <div>
               <h3 className="mb-2 text-sm font-semibold uppercase text-muted-foreground">Bill To</h3>
               <div className="space-y-1">
-                {invoice.bill_to_name && <p className="font-medium">{invoice.bill_to_name}</p>}
+                {invoice.bill_to_name && (
+                  <Link
+                    to={`/dashboard/clients?q=${encodeURIComponent(invoice.bill_to_name)}`}
+                    className="font-medium text-primary hover:underline"
+                  >
+                    {invoice.bill_to_name}
+                  </Link>
+                )}
                 {invoice.bill_to_address && <p className="text-sm text-muted-foreground">{invoice.bill_to_address}</p>}
                 {invoice.bill_to_email && <p className="text-sm text-muted-foreground">{invoice.bill_to_email}</p>}
                 {invoice.bill_to_phone && <p className="text-sm text-muted-foreground">Phone: {invoice.bill_to_phone}</p>}
