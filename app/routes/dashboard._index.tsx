@@ -192,7 +192,7 @@ export default function DashboardIndex() {
             </CardTitle>
             <DollarSign className='h-4 w-4 text-muted-foreground' />
           </CardHeader>
-          <CardContent className='pt-0 md:pt-0'>
+          <CardContent>
             <div className='text-2xl font-bold'>
               $
               <AnimatedCounter
@@ -230,7 +230,7 @@ export default function DashboardIndex() {
             </CardTitle>
             <Receipt className='h-4 w-4 text-muted-foreground' />
           </CardHeader>
-          <CardContent className='pt-0 md:pt-0'>
+          <CardContent>
             <div className='text-2xl font-bold'>
               $
               <AnimatedCounter
@@ -276,7 +276,7 @@ export default function DashboardIndex() {
             </CardTitle>
             <BarChart3 className='h-4 w-4 text-muted-foreground' />
           </CardHeader>
-          <CardContent className='pt-0 md:pt-0'>
+          <CardContent>
             <div
               className={`text-2xl font-bold ${
                 stats.netProfit >= 0 ? 'text-green-600' : 'text-red-600'
@@ -301,7 +301,7 @@ export default function DashboardIndex() {
             </CardTitle>
             <AlertCircle className='h-4 w-4 text-muted-foreground' />
           </CardHeader>
-          <CardContent className='pt-0 md:pt-0'>
+          <CardContent>
             <div className='text-2xl font-bold'>
               <AnimatedCounter value={stats.unpaidInvoices} />
             </div>
@@ -320,7 +320,7 @@ export default function DashboardIndex() {
               Total Invoices
             </CardTitle>
           </CardHeader>
-          <CardContent className='pt-0 md:pt-0'>
+          <CardContent>
             <div className='text-lg md:text-2xl font-bold'>
               <AnimatedCounter value={stats.totalInvoices} />
             </div>
@@ -333,7 +333,7 @@ export default function DashboardIndex() {
               Total Income
             </CardTitle>
           </CardHeader>
-          <CardContent className='pt-0 md:pt-0'>
+          <CardContent>
             <div className='text-lg md:text-2xl font-bold'>
               $
               <AnimatedCounter
@@ -351,7 +351,7 @@ export default function DashboardIndex() {
               Total Expenses
             </CardTitle>
           </CardHeader>
-          <CardContent className='pt-0 md:pt-0'>
+          <CardContent>
             <div className='text-lg md:text-2xl font-bold'>
               $
               <AnimatedCounter
@@ -378,7 +378,7 @@ export default function DashboardIndex() {
               </Link>
             </div>
           </CardHeader>
-          <CardContent className='pt-0 md:pt-0'>
+          <CardContent>
             {recentInvoices.length === 0 ? (
               <div className='flex flex-col items-center justify-center py-8 text-center'>
                 <FileText className='h-12 w-12 text-muted-foreground' />
@@ -439,7 +439,7 @@ export default function DashboardIndex() {
               </Link>
             </div>
           </CardHeader>
-          <CardContent className='pt-0 md:pt-0'>
+          <CardContent>
             {recentExpenses.length === 0 ? (
               <div className='flex flex-col items-center justify-center py-8 text-center'>
                 <Receipt className='h-12 w-12 text-muted-foreground' />

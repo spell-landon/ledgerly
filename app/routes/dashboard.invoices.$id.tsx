@@ -328,7 +328,7 @@ export default function InvoiceDetail() {
 
       {/* Invoice Preview */}
       <Card className="mx-auto max-w-4xl">
-        <CardContent className="p-8">
+        <CardContent className="p-8 md:pt-8">
           {/* Invoice Header */}
           <div className="mb-8 flex items-start justify-between">
             <div>

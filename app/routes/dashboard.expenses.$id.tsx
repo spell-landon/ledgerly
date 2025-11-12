@@ -184,7 +184,7 @@ export default function ExpenseDetail() {
       <div className="grid gap-6 md:grid-cols-2">
         {/* Main Info */}
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-6 md:pt-6">
             <h2 className="mb-4 text-lg font-semibold">Expense Information</h2>
 
             <div className="space-y-4">
@@ -225,7 +225,7 @@ export default function ExpenseDetail() {
         {/* Tax Information */}
         {expense.is_tax_deductible && (
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-6 md:pt-6">
               <h2 className="mb-4 text-lg font-semibold">Tax Information</h2>
 
               <div className="space-y-4">
@@ -261,7 +261,7 @@ export default function ExpenseDetail() {
 
         {/* Receipt */}
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-6 md:pt-6">
             <h2 className="mb-4 text-lg font-semibold">Receipt</h2>
 
             {expense.receipt_url ? (
@@ -317,7 +317,7 @@ export default function ExpenseDetail() {
         {/* Related Expenses */}
         {(originalExpense || (relatedReturns && relatedReturns.length > 0)) && (
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-6 md:pt-6">
               <h2 className="mb-4 text-lg font-semibold">Related Expenses</h2>
 
               {/* Show original expense if this is a return */}
