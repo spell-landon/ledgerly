@@ -203,6 +203,9 @@ export interface Database {
           business_use_percentage: number
           tax_category: string | null
           deductible_amount: number
+          is_return: boolean
+          original_expense_id: string | null
+          notes: string | null
         }
         Insert: {
           id?: string
@@ -219,6 +222,9 @@ export interface Database {
           is_tax_deductible?: boolean
           business_use_percentage?: number
           tax_category?: string | null
+          is_return?: boolean
+          original_expense_id?: string | null
+          notes?: string | null
         }
         Update: {
           id?: string
@@ -235,6 +241,9 @@ export interface Database {
           is_tax_deductible?: boolean
           business_use_percentage?: number
           tax_category?: string | null
+          is_return?: boolean
+          original_expense_id?: string | null
+          notes?: string | null
         }
       }
       line_item_templates: {

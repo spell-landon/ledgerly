@@ -9,6 +9,7 @@ import { FieldLabel } from "~/components/ui/field-label";
 import { Select } from "~/components/ui/select";
 import { Textarea } from "~/components/ui/textarea";
 import { requireAuth } from "~/lib/auth.server";
+import { formatDate } from "~/lib/utils";
 import { useState } from "react";
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
@@ -37,7 +38,15 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     throw new Response("Expense not found", { status: 404 });
   }
 
-  return json({ expense }, { headers });
+  // Fetch user's expenses for the return expense dropdown (excluding current expense)
+  const { data: expenses } = await supabase
+    .from('expenses')
+    .select('id, description, merchant, date, total')
+    .neq('id', id)
+    .order('date', { ascending: false })
+    .limit(100);
+
+  return json({ expense, expenses: expenses || [] }, { headers });
 }
 
 export async function action({ request, params }: ActionFunctionArgs) {
@@ -89,6 +98,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
   }
 
   // Parse form data
+  const isReturn = formData.get("is_return") === "on";
+  const originalExpenseId = formData.get("original_expense_id") as string || null;
+
   const expenseData = {
     merchant: formData.get("vendor") as string || "",
     description: formData.get("description") as string || null,
@@ -100,6 +112,8 @@ export async function action({ request, params }: ActionFunctionArgs) {
     is_tax_deductible: formData.get("is_tax_deductible") === "on",
     tax_category: formData.get("tax_category") as string || null,
     business_use_percentage: parseFloat(formData.get("business_use_percentage") as string || "100"),
+    is_return: isReturn,
+    original_expense_id: isReturn && originalExpenseId ? originalExpenseId : null,
   };
 
   const { error } = await supabase
@@ -116,11 +130,13 @@ export async function action({ request, params }: ActionFunctionArgs) {
 }
 
 export default function EditExpense() {
-  const { expense } = useLoaderData<typeof loader>();
+  const { expense, expenses } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
   const isSubmitting = navigation.state === "submitting";
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isReturn, setIsReturn] = useState(expense.is_return || false);
+  const [selectedOriginalExpense, setSelectedOriginalExpense] = useState<string>(expense.original_expense_id || "");
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -186,7 +202,6 @@ export default function EditExpense() {
                   name="amount"
                   type="number"
                   step="0.01"
-                  min="0"
                   placeholder="0.00"
                   defaultValue={expense.total}
                   required
@@ -246,6 +261,53 @@ export default function EditExpense() {
                 disabled={isSubmitting}
               />
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Return/Refund Tracking */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Return/Refund</CardTitle>
+            <CardDescription>Mark this expense as a return or refund and link to the original purchase</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="is_return"
+                name="is_return"
+                checked={isReturn}
+                onChange={(e) => setIsReturn(e.target.checked)}
+                disabled={isSubmitting}
+                className="h-4 w-4 rounded border-gray-300"
+              />
+              <Label htmlFor="is_return" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                This is a return or refund
+              </Label>
+            </div>
+
+            {isReturn && (
+              <div className="space-y-2">
+                <FieldLabel htmlFor="original_expense_id" label="Original Expense" />
+                <Select
+                  id="original_expense_id"
+                  name="original_expense_id"
+                  value={selectedOriginalExpense}
+                  onChange={(e) => setSelectedOriginalExpense(e.target.value)}
+                  disabled={isSubmitting}
+                >
+                  <option value="">Select original expense (optional)</option>
+                  {expenses.map((exp) => (
+                    <option key={exp.id} value={exp.id}>
+                      {exp.description || exp.merchant} - ${exp.total.toFixed(2)} ({formatDate(exp.date)})
+                    </option>
+                  ))}
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Link this return/refund to the original purchase for accurate tracking
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
 

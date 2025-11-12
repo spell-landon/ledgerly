@@ -24,7 +24,7 @@ import {
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
 import { requireAuth } from '~/lib/auth.server';
-import { formatCurrency } from '~/lib/utils';
+import { formatCurrency, formatCategory, formatDate } from '~/lib/utils';
 import { AnimatedCounter } from '~/components/ui/animated-counter';
 
 export const meta: MetaFunction = () => {
@@ -106,7 +106,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   invoices.forEach((inv) => {
     if (inv.status === 'paid') {
-      const month = new Date(inv.date).toLocaleDateString('en-US', {
+      const month = formatDate(inv.date, {
         year: 'numeric',
         month: 'short',
       });
@@ -118,7 +118,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   });
 
   expenses.forEach((exp) => {
-    const month = new Date(exp.date).toLocaleDateString('en-US', {
+    const month = formatDate(exp.date, {
       year: 'numeric',
       month: 'short',
     });
@@ -638,8 +638,8 @@ export default function Reports() {
                       key={category}
                       className='flex items-center justify-between'>
                       <div>
-                        <p className='text-sm font-medium capitalize'>
-                          {category.replace(/_/g, ' ')}
+                        <p className='text-sm font-medium'>
+                          {formatCategory(category)}
                         </p>
                         <p className='text-xs text-muted-foreground'>
                           {data.count} expense{data.count !== 1 ? 's' : ''}

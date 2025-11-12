@@ -4,7 +4,7 @@ import { ArrowLeft, Edit, Trash2, Download, FileText } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import { requireAuth } from "~/lib/auth.server";
-import { formatCurrency } from "~/lib/utils";
+import { formatCurrency, formatCategory, formatDate } from "~/lib/utils";
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
   return [
@@ -32,7 +32,29 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     throw new Response("Expense not found", { status: 404 });
   }
 
-  return json({ expense, user: session.user }, { headers });
+  // Fetch original expense if this is a return
+  let originalExpense = null;
+  if (expense.original_expense_id) {
+    const { data } = await supabase
+      .from("expenses")
+      .select("*")
+      .eq("id", expense.original_expense_id)
+      .single();
+    originalExpense = data;
+  }
+
+  // Fetch returns linked to this expense
+  const { data: relatedReturns } = await supabase
+    .from("expenses")
+    .select("*")
+    .eq("original_expense_id", id);
+
+  return json({
+    expense,
+    originalExpense,
+    relatedReturns: relatedReturns || [],
+    user: session.user
+  }, { headers });
 }
 
 export async function action({ request, params }: ActionFunctionArgs) {
@@ -92,15 +114,18 @@ function getCategoryBadge(category: string) {
 
   return (
     <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${color}`}>
-      {category || "Other"}
+      {formatCategory(category)}
     </span>
   );
 }
 
 export default function ExpenseDetail() {
-  const { expense } = useLoaderData<typeof loader>();
+  const { expense, originalExpense, relatedReturns } = useLoaderData<typeof loader>();
   const navigation = useNavigation();
   const isDeleting = navigation.state === "submitting" && navigation.formData?.get("intent") === "delete";
+
+  // Calculate net total if there are related returns
+  const netTotal = expense.total + (relatedReturns || []).reduce((sum, ret) => sum + ret.total, 0);
 
   return (
     <div className="container mx-auto space-y-6 p-4 md:p-6">
@@ -116,9 +141,14 @@ export default function ExpenseDetail() {
             <div className="flex flex-wrap items-center gap-3">
               <h1 className="text-2xl font-bold md:text-3xl">{expense.description}</h1>
               {getCategoryBadge(expense.category)}
+              {expense.is_return && (
+                <span className="inline-flex items-center rounded-full bg-destructive/10 px-2.5 py-0.5 text-xs font-semibold text-destructive">
+                  Return/Refund
+                </span>
+              )}
             </div>
             <p className="text-sm text-muted-foreground md:text-base">
-              {new Date(expense.date).toLocaleDateString('en-US', {
+              {formatDate(expense.date, {
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric'
@@ -166,7 +196,7 @@ export default function ExpenseDetail() {
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
                   <p className="text-sm text-muted-foreground">Date</p>
-                  <p className="font-medium">{new Date(expense.date).toLocaleDateString()}</p>
+                  <p className="font-medium">{formatDate(expense.date)}</p>
                 </div>
 
                 <div>
@@ -200,18 +230,30 @@ export default function ExpenseDetail() {
             {expense.receipt_url ? (
               <div className="space-y-4">
                 <div className="overflow-hidden rounded-lg border bg-muted">
-                  {expense.receipt_url.match(/\.(jpg|jpeg|png|gif)$/i) ? (
+                  {expense.receipt_url.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i) ? (
                     <img
                       src={expense.receipt_url}
                       alt="Receipt"
-                      className="h-auto w-full"
+                      className="h-auto w-full object-contain"
+                      onError={(e) => {
+                        // If image fails to load, show fallback
+                        const target = e.currentTarget;
+                        target.style.display = 'none';
+                        const fallback = target.nextElementSibling as HTMLElement;
+                        if (fallback) fallback.style.display = 'flex';
+                      }}
                     />
-                  ) : (
-                    <div className="flex flex-col items-center justify-center p-12">
-                      <FileText className="h-16 w-16 text-muted-foreground" />
-                      <p className="mt-4 text-sm text-muted-foreground">Receipt file uploaded</p>
-                    </div>
-                  )}
+                  ) : expense.receipt_url.match(/\.(pdf)(\?|$)/i) ? (
+                    <iframe
+                      src={expense.receipt_url}
+                      className="h-[600px] w-full"
+                      title="Receipt PDF"
+                    />
+                  ) : null}
+                  <div className={expense.receipt_url.match(/\.(jpg|jpeg|png|gif|webp|pdf)(\?|$)/i) ? "hidden flex-col items-center justify-center p-12" : "flex flex-col items-center justify-center p-12"}>
+                    <FileText className="h-16 w-16 text-muted-foreground" />
+                    <p className="mt-4 text-sm text-muted-foreground">Receipt file uploaded</p>
+                  </div>
                 </div>
 
                 <a
@@ -234,6 +276,69 @@ export default function ExpenseDetail() {
             )}
           </CardContent>
         </Card>
+
+        {/* Related Expenses */}
+        {(originalExpense || (relatedReturns && relatedReturns.length > 0)) && (
+          <Card>
+            <CardContent className="p-6">
+              <h2 className="mb-4 text-lg font-semibold">Related Expenses</h2>
+
+              {/* Show original expense if this is a return */}
+              {originalExpense && expense.is_return && (
+                <div className="mb-4 space-y-2">
+                  <p className="text-sm text-muted-foreground">Original Purchase</p>
+                  <Link
+                    to={`/dashboard/expenses/${originalExpense.id}`}
+                    className="block rounded-lg border bg-muted/50 p-4 transition-colors hover:bg-muted"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-1">
+                        <p className="font-medium">{originalExpense.description || originalExpense.merchant}</p>
+                        <p className="text-sm text-muted-foreground">{formatDate(originalExpense.date)}</p>
+                      </div>
+                      <p className="text-lg font-semibold">${formatCurrency(originalExpense.total)}</p>
+                    </div>
+                  </Link>
+                </div>
+              )}
+
+              {/* Show returns if this has related returns */}
+              {relatedReturns && relatedReturns.length > 0 && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-muted-foreground">
+                      Returns & Refunds ({relatedReturns.length})
+                    </p>
+                    {relatedReturns.length > 0 && (
+                      <p className="text-sm font-medium">
+                        Net Total: ${formatCurrency(netTotal)}
+                      </p>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    {relatedReturns.map((returnExpense) => (
+                      <Link
+                        key={returnExpense.id}
+                        to={`/dashboard/expenses/${returnExpense.id}`}
+                        className="block rounded-lg border bg-muted/50 p-4 transition-colors hover:bg-muted"
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="space-y-1">
+                            <p className="font-medium">{returnExpense.description || returnExpense.merchant}</p>
+                            <p className="text-sm text-muted-foreground">{formatDate(returnExpense.date)}</p>
+                          </div>
+                          <p className="text-lg font-semibold text-destructive">
+                            ${formatCurrency(returnExpense.total)}
+                          </p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );

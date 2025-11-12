@@ -4,12 +4,12 @@ import {
   type MetaFunction,
 } from '@remix-run/node';
 import { Link, useLoaderData, useSearchParams } from '@remix-run/react';
-import { Plus, Eye, Trash2, Download } from 'lucide-react';
+import { Plus, Eye, Trash2, Download, Link2, RefreshCcw } from 'lucide-react';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent } from '~/components/ui/card';
 import { Badge } from '~/components/ui/badge';
 import { requireAuth } from '~/lib/auth.server';
-import { formatCurrency } from '~/lib/utils';
+import { formatCurrency, formatCategory, formatDate } from '~/lib/utils';
 import { Pagination } from '~/components/pagination';
 import { SearchInput } from '~/components/search-input';
 import { parsePaginationParams, getSupabaseRange } from '~/lib/pagination';
@@ -90,7 +90,7 @@ function getCategoryBadge(category: string) {
   return (
     <span
       className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${color}`}>
-      {category || 'Other'}
+      {formatCategory(category)}
     </span>
   );
 }
@@ -172,8 +172,14 @@ export default function ExpensesIndex() {
                         {expense.merchant}
                       </p>
                     </div>
-                    <div className='mb-3'>
+                    <div className='mb-3 flex items-center gap-2'>
                       {getCategoryBadge(expense.category)}
+                      {(expense.is_return || expense.original_expense_id) && (
+                        <span className='flex items-center gap-1 text-xs text-muted-foreground' title='Linked expense'>
+                          <Link2 className='h-3 w-3' />
+                          {expense.is_return && <RefreshCcw className='h-3 w-3' />}
+                        </span>
+                      )}
                     </div>
                     <div className='grid grid-cols-2 gap-2'>
                       <div>
@@ -185,7 +191,7 @@ export default function ExpensesIndex() {
                       <div className='text-right'>
                         <p className='text-xs text-muted-foreground'>Date</p>
                         <p className='text-sm'>
-                          {new Date(expense.date).toLocaleDateString()}
+                          {formatDate(expense.date)}
                         </p>
                       </div>
                     </div>
@@ -251,7 +257,7 @@ export default function ExpensesIndex() {
                         key={expense.id}
                         className='transition-colors hover:bg-muted/50'>
                         <td className='px-6 py-4 text-sm'>
-                          {new Date(expense.date).toLocaleDateString()}
+                          {formatDate(expense.date)}
                         </td>
                         <td className='px-6 py-4'>
                           <Link
@@ -264,7 +270,15 @@ export default function ExpensesIndex() {
                           {expense.merchant}
                         </td>
                         <td className='px-6 py-4'>
-                          {getCategoryBadge(expense.category)}
+                          <div className='flex items-center gap-2'>
+                            {getCategoryBadge(expense.category)}
+                            {(expense.is_return || expense.original_expense_id) && (
+                              <span className='flex items-center gap-1 text-muted-foreground' title='Linked expense'>
+                                <Link2 className='h-3 w-3' />
+                                {expense.is_return && <RefreshCcw className='h-3 w-3' />}
+                              </span>
+                            )}
+                          </div>
                         </td>
                         <td className='px-6 py-4 text-sm font-medium'>
                           ${formatCurrency(expense.total)}
