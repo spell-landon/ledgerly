@@ -75,6 +75,16 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: "#1f2937",
   },
+  itemName: {
+    fontSize: 11,
+    fontWeight: "bold",
+    marginBottom: 3,
+  },
+  itemDescription: {
+    fontSize: 9,
+    color: "#6b7280",
+    lineHeight: 1.4,
+  },
   descriptionCol: {
     width: "45%",
   },
@@ -231,7 +241,12 @@ export function InvoicePDF({ invoice }: InvoicePDFProps) {
           {/* Table Rows */}
           {lineItems.map((item: any, index: number) => (
             <View key={index} style={styles.tableRow}>
-              <Text style={[styles.tableCell, styles.descriptionCol]}>{item.description}</Text>
+              <View style={[styles.descriptionCol]}>
+                <Text style={styles.itemName}>{item.name || item.description}</Text>
+                {item.name && item.description && (
+                  <Text style={styles.itemDescription}>{item.description}</Text>
+                )}
+              </View>
               <Text style={[styles.tableCell, styles.rateCol]}>
                 ${formatCurrency(parseFloat(item.rate || 0))}
               </Text>

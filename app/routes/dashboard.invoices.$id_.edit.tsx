@@ -150,7 +150,7 @@ export default function EditInvoice() {
   const initialLineItems =
     Array.isArray(invoice.line_items) && invoice.line_items.length > 0
       ? invoice.line_items
-      : [{ description: '', rate: '', quantity: '1', amount: '' }];
+      : [{ name: '', description: '', rate: '', quantity: '1', amount: '' }];
 
   // Check if current terms is a custom value (not in predefined options)
   const predefinedTerms = [
@@ -207,7 +207,7 @@ export default function EditInvoice() {
   const addLineItem = () => {
     setLineItems([
       ...lineItems,
-      { description: '', rate: '', quantity: '1', amount: '' },
+      { name: '', description: '', rate: '', quantity: '1', amount: '' },
     ]);
   };
 
@@ -292,33 +292,17 @@ export default function EditInvoice() {
         </div>
       </div>
 
-      <Form method='post' className='space-y-6' ref={formRef}>
+      <Form method='post' ref={formRef}>
         {actionData?.error && (
-          <div className='rounded-md bg-destructive/15 p-3 text-sm text-destructive'>
+          <div className='rounded-md bg-destructive/15 p-3 text-sm text-destructive mb-6'>
             {actionData.error}
           </div>
         )}
 
-        {/* Invoice Name */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Invoice Details</CardTitle>
-          </CardHeader>
-          <CardContent className='space-y-4'>
-            <div className='space-y-2'>
-              <FieldLabel htmlFor='invoiceName' label='Invoice Name' required />
-              <Input
-                id='invoiceName'
-                name='invoiceName'
-                placeholder='e.g., Website Development - Client Name'
-                defaultValue={invoice.invoice_name}
-                required
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* From Section */}
+        <div className='grid gap-6 lg:grid-cols-3'>
+          {/* Main Content - Left Column */}
+          <div className='space-y-6 lg:col-span-2'>
+            {/* From Section */}
         <Card>
           <CardHeader>
             <CardTitle>From</CardTitle>
@@ -472,82 +456,6 @@ export default function EditInvoice() {
           </CardContent>
         </Card>
 
-        {/* Invoice Number, Date, Terms, Status */}
-        <Card>
-          <CardContent className='grid gap-4 pt-6 md:pt-6 sm:grid-cols-2 lg:grid-cols-4'>
-            <div className='space-y-2'>
-              <FieldLabel
-                htmlFor='invoiceNumber'
-                label='Invoice Number'
-                required
-              />
-              <Input
-                id='invoiceNumber'
-                name='invoiceNumber'
-                defaultValue={invoice.invoice_number}
-                required
-              />
-            </div>
-            <div className='space-y-2'>
-              <FieldLabel htmlFor='date' label='Date' required />
-              <Input
-                id='date'
-                name='date'
-                type='date'
-                defaultValue={invoice.date}
-                required
-                className='min-w-0'
-              />
-            </div>
-            <div className='space-y-2'>
-              <FieldLabel htmlFor='terms' label='Terms' required />
-              <Select
-                id='terms'
-                name='terms'
-                defaultValue={isCustomTerms ? 'custom' : invoice.terms}
-                required
-                onChange={(e) =>
-                  setShowCustomTerms(e.target.value === 'custom')
-                }>
-                <option value='none'>No Terms</option>
-                <option value='on_receipt'>On Receipt</option>
-                <option value='1_day'>Next Day</option>
-                <option value='2_days'>2 Days</option>
-                <option value='3_days'>3 Days</option>
-                <option value='5_days'>5 Days</option>
-                <option value='7_days'>7 Days</option>
-                <option value='14_days'>14 Days</option>
-                <option value='30_days'>30 Days</option>
-                <option value='custom'>Custom</option>
-              </Select>
-              {showCustomTerms && (
-                <div className='mt-2'>
-                  <Input
-                    id='customTerms'
-                    name='customTerms'
-                    placeholder='Enter custom payment terms (e.g., Net 45, Due upon completion, etc.)'
-                    defaultValue={isCustomTerms ? invoice.terms : ''}
-                    required={showCustomTerms}
-                  />
-                </div>
-              )}
-            </div>
-            <div className='space-y-2'>
-              <FieldLabel htmlFor='status' label='Status' required />
-              <Select
-                id='status'
-                name='status'
-                defaultValue={invoice.status}
-                required>
-                <option value='draft'>Draft</option>
-                <option value='sent'>Sent</option>
-                <option value='paid'>Paid</option>
-                <option value='overdue'>Overdue</option>
-              </Select>
-            </div>
-          </CardContent>
-        </Card>
-
         {/* Line Items */}
         <Card>
           <CardHeader>
@@ -570,54 +478,76 @@ export default function EditInvoice() {
             {lineItems.map((item, index) => (
               <div
                 key={index}
-                className='grid gap-4 rounded-lg border p-4 md:grid-cols-12'>
-                <div className='md:col-span-5 space-y-2'>
-                  <Label>Description</Label>
+                className='rounded-lg border p-4 space-y-4'>
+                {/* Top Row: Name and Delete */}
+                <div className='flex items-start gap-4'>
+                  <div className='flex-1 space-y-2'>
+                    <Label className='font-semibold'>Name</Label>
+                    <Input
+                      value={item.name || ''}
+                      onChange={(e) =>
+                        updateLineItem(index, 'name', e.target.value)
+                      }
+                      placeholder='Item or service name'
+                      className='text-base font-medium'
+                    />
+                  </div>
+                  <div className='pt-7'>
+                    <Button
+                      type='button'
+                      variant='ghost'
+                      size='icon'
+                      onClick={() => removeLineItem(index)}
+                      disabled={lineItems.length === 1}
+                      className='h-10 w-10'>
+                      <Trash2 className='h-4 w-4' />
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Description Row */}
+                <div className='space-y-2'>
+                  <Label className='text-sm'>Description (optional)</Label>
                   <Input
-                    value={item.description}
+                    value={item.description || ''}
                     onChange={(e) =>
                       updateLineItem(index, 'description', e.target.value)
                     }
-                    placeholder='Item or service description'
+                    placeholder='Additional details about the item'
+                    className='text-sm'
                   />
                 </div>
-                <div className='md:col-span-2 space-y-2'>
-                  <Label>Rate</Label>
-                  <Input
-                    type='number'
-                    step='0.01'
-                    value={item.rate}
-                    onChange={(e) =>
-                      updateLineItem(index, 'rate', e.target.value)
-                    }
-                    placeholder='0.00'
-                  />
-                </div>
-                <div className='md:col-span-2 space-y-2'>
-                  <Label>Quantity</Label>
-                  <Input
-                    type='number'
-                    step='0.01'
-                    value={item.quantity}
-                    onChange={(e) =>
-                      updateLineItem(index, 'quantity', e.target.value)
-                    }
-                    placeholder='1'
-                  />
-                </div>
-                <div className='md:col-span-2 space-y-2'>
-                  <Label>Amount</Label>
-                  <Input value={item.amount} readOnly className='bg-muted' />
-                </div>
-                <div className='md:col-span-1 flex items-end'>
-                  <Button
-                    type='button'
-                    variant='ghost'
-                    size='icon'
-                    onClick={() => removeLineItem(index)}
-                    disabled={lineItems.length === 1}>
-                    <Trash2 className='h-4 w-4' />
-                  </Button>
+
+                {/* Bottom Row: Rate, Quantity, Amount */}
+                <div className='grid gap-4 sm:grid-cols-3'>
+                  <div className='space-y-2'>
+                    <Label>Rate</Label>
+                    <Input
+                      type='number'
+                      step='0.01'
+                      value={item.rate}
+                      onChange={(e) =>
+                        updateLineItem(index, 'rate', e.target.value)
+                      }
+                      placeholder='0.00'
+                    />
+                  </div>
+                  <div className='space-y-2'>
+                    <Label>Quantity</Label>
+                    <Input
+                      type='number'
+                      step='0.01'
+                      value={item.quantity}
+                      onChange={(e) =>
+                        updateLineItem(index, 'quantity', e.target.value)
+                      }
+                      placeholder='1'
+                    />
+                  </div>
+                  <div className='space-y-2'>
+                    <Label>Amount</Label>
+                    <Input value={item.amount} readOnly className='bg-muted' />
+                  </div>
                 </div>
               </div>
             ))}
@@ -631,9 +561,101 @@ export default function EditInvoice() {
             />
           </CardContent>
         </Card>
+          </div>
 
-        {/* Summary */}
-        <Card>
+          {/* Summary & Notes - Right Column */}
+          <div className='space-y-6 lg:sticky lg:top-4 lg:self-start'>
+            {/* Invoice Details */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Invoice Details</CardTitle>
+              </CardHeader>
+              <CardContent className='space-y-4'>
+                <div className='space-y-2'>
+                  <FieldLabel htmlFor='invoiceName' label='Invoice Name' required />
+                  <Input
+                    id='invoiceName'
+                    name='invoiceName'
+                    placeholder='e.g., Website Development - Client Name'
+                    defaultValue={invoice.invoice_name}
+                    required
+                  />
+                </div>
+                <div className='space-y-2'>
+                  <FieldLabel
+                    htmlFor='invoiceNumber'
+                    label='Invoice Number'
+                    required
+                  />
+                  <Input
+                    id='invoiceNumber'
+                    name='invoiceNumber'
+                    defaultValue={invoice.invoice_number}
+                    required
+                  />
+                </div>
+                <div className='space-y-2'>
+                  <FieldLabel htmlFor='date' label='Date' required />
+                  <Input
+                    id='date'
+                    name='date'
+                    type='date'
+                    defaultValue={invoice.date}
+                    required
+                    className='min-w-0'
+                  />
+                </div>
+                <div className='space-y-2'>
+                  <FieldLabel htmlFor='terms' label='Terms' required />
+                  <Select
+                    id='terms'
+                    name='terms'
+                    defaultValue={isCustomTerms ? 'custom' : invoice.terms}
+                    required
+                    onChange={(e) =>
+                      setShowCustomTerms(e.target.value === 'custom')
+                    }>
+                    <option value='none'>No Terms</option>
+                    <option value='on_receipt'>On Receipt</option>
+                    <option value='1_day'>Next Day</option>
+                    <option value='2_days'>2 Days</option>
+                    <option value='3_days'>3 Days</option>
+                    <option value='5_days'>5 Days</option>
+                    <option value='7_days'>7 Days</option>
+                    <option value='14_days'>14 Days</option>
+                    <option value='30_days'>30 Days</option>
+                    <option value='custom'>Custom</option>
+                  </Select>
+                  {showCustomTerms && (
+                    <div className='mt-2'>
+                      <Input
+                        id='customTerms'
+                        name='customTerms'
+                        placeholder='Enter custom payment terms (e.g., Net 45, Due upon completion, etc.)'
+                        defaultValue={isCustomTerms ? invoice.terms : ''}
+                        required={showCustomTerms}
+                      />
+                    </div>
+                  )}
+                </div>
+                <div className='space-y-2'>
+                  <FieldLabel htmlFor='status' label='Status' required />
+                  <Select
+                    id='status'
+                    name='status'
+                    defaultValue={invoice.status}
+                    required>
+                    <option value='draft'>Draft</option>
+                    <option value='sent'>Sent</option>
+                    <option value='paid'>Paid</option>
+                    <option value='overdue'>Overdue</option>
+                  </Select>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Summary */}
+            <Card>
           <CardHeader>
             <CardTitle>Summary</CardTitle>
           </CardHeader>
@@ -675,6 +697,8 @@ export default function EditInvoice() {
             />
           </CardContent>
         </Card>
+          </div>
+        </div>
       </Form>
       </div>
     </>

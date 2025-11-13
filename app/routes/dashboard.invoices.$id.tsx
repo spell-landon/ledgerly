@@ -412,7 +412,14 @@ export default function InvoiceDetail() {
                 <tbody className="divide-y">
                   {lineItems.map((item: any, index: number) => (
                     <tr key={index}>
-                      <td className="px-3 py-2 text-xs md:px-4 md:py-3 md:text-sm">{item.description}</td>
+                      <td className="px-3 py-2 md:px-4 md:py-3">
+                        <div className="space-y-1">
+                          <div className="text-sm md:text-base font-semibold">{item.name || item.description}</div>
+                          {item.name && item.description && (
+                            <div className="text-xs md:text-sm text-muted-foreground">{item.description}</div>
+                          )}
+                        </div>
+                      </td>
                       <td className="px-3 py-2 text-right text-xs whitespace-nowrap md:px-4 md:py-3 md:text-sm">
                         ${formatCurrency(parseFloat(item.rate || 0))}
                       </td>

@@ -160,7 +160,14 @@ export default function PublicInvoice() {
                   <tbody className="divide-y">
                     {lineItems.map((item: any, index: number) => (
                       <tr key={index}>
-                        <td className="px-4 py-3 text-sm">{item.description}</td>
+                        <td className="px-4 py-3">
+                          <div className="space-y-1">
+                            <div className="text-base font-semibold">{item.name || item.description}</div>
+                            {item.name && item.description && (
+                              <div className="text-sm text-muted-foreground">{item.description}</div>
+                            )}
+                          </div>
+                        </td>
                         <td className="px-4 py-3 text-right text-sm">
                           ${formatCurrency(parseFloat(item.rate || 0))}
                         </td>
