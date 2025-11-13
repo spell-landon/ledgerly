@@ -9,12 +9,11 @@ import { Button } from '~/components/ui/button';
 import { Card, CardContent } from '~/components/ui/card';
 import { Badge } from '~/components/ui/badge';
 import { requireAuth } from '~/lib/auth.server';
-import { formatCurrency } from '~/lib/utils';
+import { formatCurrency, formatDate, cn } from '~/lib/utils';
 import { Pagination } from '~/components/pagination';
 import { SearchInput } from '~/components/search-input';
 import { parsePaginationParams, getSupabaseRange } from '~/lib/pagination';
 import { parseSearchParams, buildSupabaseSearchQuery } from '~/lib/search';
-import { cn } from '~/lib/utils';
 
 export const meta: MetaFunction = () => {
   return [
@@ -307,7 +306,7 @@ export default function InvoicesIndex() {
                       <div className='text-right'>
                         <p className='text-xs text-muted-foreground'>Date</p>
                         <p className='text-sm'>
-                          {new Date(invoice.date).toLocaleDateString()}
+                          {formatDate(invoice.date)}
                         </p>
                       </div>
                       {invoice.payment_method && (
@@ -408,7 +407,7 @@ export default function InvoicesIndex() {
                           {invoice.bill_to_name || '—'}
                         </td>
                         <td className='px-6 py-4 text-sm'>
-                          {new Date(invoice.date).toLocaleDateString()}
+                          {formatDate(invoice.date)}
                         </td>
                         <td className='px-6 py-4 text-sm font-medium'>
                           ${formatCurrency(invoice.total)}

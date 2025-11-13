@@ -5,7 +5,7 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
 import { createSupabaseServiceClient } from "~/lib/supabase.server";
-import { formatCurrency } from "~/lib/utils";
+import { formatCurrency, formatDate } from "~/lib/utils";
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
   return [
@@ -100,7 +100,7 @@ export default function PublicInvoice() {
               <div className="text-right">
                 <p className="text-sm font-medium">Date</p>
                 <p className="text-sm text-muted-foreground">
-                  {new Date(invoice.date).toLocaleDateString()}
+                  {formatDate(invoice.date)}
                 </p>
                 {invoice.terms && (
                   <>

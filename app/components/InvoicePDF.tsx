@@ -1,5 +1,5 @@
 import { Document, Page, Text, View, StyleSheet, Font } from "@react-pdf/renderer";
-import { formatCurrency } from "~/lib/utils";
+import { formatCurrency, formatDate } from "~/lib/utils";
 
 // Define styles
 const styles = StyleSheet.create({
@@ -179,7 +179,7 @@ export function InvoicePDF({ invoice }: InvoicePDFProps) {
           <View style={styles.dateSection}>
             <Text style={styles.addressLine}>
               <Text style={{ fontWeight: "bold" }}>Date: </Text>
-              {new Date(invoice.date).toLocaleDateString()}
+              {formatDate(invoice.date)}
             </Text>
             {invoice.terms && (
               <Text style={styles.addressLine}>

@@ -10,7 +10,7 @@ import { Label } from "~/components/ui/label";
 import { FieldLabel } from "~/components/ui/field-label";
 import { ConfirmDialog } from "~/components/ui/confirm-dialog";
 import { requireAuth } from "~/lib/auth.server";
-import { formatCurrency } from "~/lib/utils";
+import { formatCurrency, formatDate } from "~/lib/utils";
 import { useState, useRef } from "react";
 import { sendInvoiceEmail } from "~/lib/email.server";
 
@@ -345,7 +345,7 @@ export default function InvoiceDetail() {
             <div className="text-right">
               <p className="text-sm font-medium">Date</p>
               <p className="text-sm text-muted-foreground">
-                {new Date(invoice.date).toLocaleDateString()}
+                {formatDate(invoice.date)}
               </p>
               {invoice.terms && (
                 <>
