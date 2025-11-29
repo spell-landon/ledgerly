@@ -25,7 +25,7 @@ import {
 } from '~/components/ui/card';
 import { Badge } from '~/components/ui/badge';
 import { requireAuth } from '~/lib/auth.server';
-import { formatCurrency } from '~/lib/utils';
+import { formatCurrency, formatDate } from '~/lib/utils';
 import { AnimatedCounter } from '~/components/ui/animated-counter';
 
 export const meta: MetaFunction = () => {
@@ -465,7 +465,7 @@ export default function DashboardIndex() {
                         {expense.description}
                       </p>
                       <p className='text-xs text-muted-foreground'>
-                        {new Date(expense.date).toLocaleDateString()}
+                        {formatDate(expense.date)}
                       </p>
                     </div>
                     <div className='text-right'>

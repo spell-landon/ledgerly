@@ -411,16 +411,25 @@ export default function Index() {
               </h3>
               <ul className='space-y-3'>
                 <li>
-                  <span className='text-neutral-400 dark:text-neutral-600'>
-                    Privacy Policy{' '}
-                    <span className='text-xs'>(Coming soon)</span>
-                  </span>
+                  <Link
+                    to='/privacy'
+                    className='text-neutral-600 transition-colors hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100'>
+                    Privacy Policy
+                  </Link>
                 </li>
                 <li>
-                  <span className='text-neutral-400 dark:text-neutral-600'>
-                    Terms of Service{' '}
-                    <span className='text-xs'>(Coming soon)</span>
-                  </span>
+                  <Link
+                    to='/terms'
+                    className='text-neutral-600 transition-colors hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100'>
+                    Terms of Service
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to='/cookies'
+                    className='text-neutral-600 transition-colors hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100'>
+                    Cookie Policy
+                  </Link>
                 </li>
               </ul>
             </div>

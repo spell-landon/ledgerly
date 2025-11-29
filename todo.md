@@ -38,7 +38,7 @@
 ## Dashboard:
 
 - ✅ The "Recent Invoices" and "Recent Expenses" allows for a line item to extend past the viewport. I think it's the name that doesn't truncate or wrap causing the overflow issue.
-- ⚠️ The "Recent Expenses" is having the same date issue where the entry has a date, but the displayed date is the day before. Example: The first entry has a date set to 11/26/2025, but on the card that is displayed here it shows 11/25/2025.
+- ✅ The "Recent Expenses" on the Dashboard is having the same date issue where the entry has a date, but the displayed date is the day before. Example: The first entry has a date set to 11/26/2025, but on the card that is displayed here it shows 11/25/2025.
 
 ## Clients:
 
@@ -62,13 +62,15 @@
 # Future Improvements
 
 ## Legal Pages (Required before public marketing)
-- [ ] Privacy Policy page
-- [ ] Terms of Service page
-- [ ] Cookie Policy page (if using analytics)
+
+- [x] Privacy Policy page
+- [x] Terms of Service page
+- [x] Cookie Policy page (if using analytics)
 
 ## Authentication Enhancements
 
 ### Google OAuth Setup
+
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)
 2. Create a new project or select existing
 3. Go to APIs & Services > Credentials
@@ -81,6 +83,7 @@
 8. Update login page to add Google sign-in button
 
 ### Apple Sign-In Setup
+
 1. Go to [Apple Developer Portal](https://developer.apple.com/)
 2. Create an App ID with Sign in with Apple enabled
 3. Create a Services ID for web authentication
@@ -92,6 +95,7 @@
 6. Update login page to add Apple sign-in button
 
 ### SMS/Phone Authentication
+
 - Phone auth routes already created (`login-phone.tsx`)
 - In Supabase Dashboard > Authentication > Providers > Phone:
   - Enable Phone provider
@@ -100,6 +104,7 @@
 - Test with real phone numbers
 
 ## Dashboard Features
+
 - [ ] Logo upload in business settings
 - [ ] Mileage rate configuration (currently hardcoded $0.67)
 - [ ] Email template customization in settings
@@ -108,6 +113,7 @@
 - [ ] Household settings: flexible monthly items list with auto-suggest on expenses
 
 ## Infrastructure
+
 - [ ] Rate limiting on auth endpoints
 - [ ] Security headers (CSP, HSTS)
 - [ ] Error monitoring (Sentry)
@@ -116,6 +122,7 @@
 - [ ] Database backups and monitoring
 
 ## Marketing & Landing Page
+
 - [ ] Real testimonials/case studies
 - [ ] Blog/resources section for SEO
 - [ ] Detailed feature pages
@@ -123,3 +130,8 @@
 - [ ] Contact form
 - [ ] Social media profiles and links
 - [ ] Email newsletter signup
+
+## Settings
+
+- [ ] Add the ability to change subscription plan. (Set my user in Supabase as a pro/admin user)
+- [ ] Figure out payment plan structure and how to handle payments? (Stripe?)
