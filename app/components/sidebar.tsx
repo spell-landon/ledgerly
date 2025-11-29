@@ -2,7 +2,7 @@ import { cn } from '~/lib/utils';
 import { Link, type LinkProps, useLocation, useNavigation } from '@remix-run/react';
 import React, { useState, createContext, useContext } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Menu, X, ChevronLeft, FileText, Loader2 } from 'lucide-react';
+import { Menu, X, ChevronLeft, Loader2 } from 'lucide-react';
 
 interface Links {
   label: string;
@@ -223,7 +223,7 @@ export const Logo = () => {
     <Link
       to='/dashboard'
       className='relative z-20 flex items-center gap-2 py-1 text-sm font-normal text-black'>
-      <FileText className='h-6 w-6 flex-shrink-0 text-primary' />
+      <img src='/favicon.svg' alt='Figurely' className='h-7 w-7 flex-shrink-0' />
       <motion.span
         initial={false}
         animate={{
@@ -241,7 +241,7 @@ export const LogoIcon = () => {
     <Link
       to='/dashboard'
       className='relative z-20 flex items-center space-x-2 py-1 text-sm font-normal text-black'>
-      <FileText className='h-6 w-6 flex-shrink-0 text-primary' />
+      <img src='/favicon.svg' alt='Figurely' className='h-7 w-7 flex-shrink-0' />
       <span className='font-bold text-xl md:hidden dark:text-white font-serif'>
         Figurely
       </span>

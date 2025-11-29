@@ -38,6 +38,7 @@
 ## Dashboard:
 
 - ✅ The "Recent Invoices" and "Recent Expenses" allows for a line item to extend past the viewport. I think it's the name that doesn't truncate or wrap causing the overflow issue.
+- ⚠️ The "Recent Expenses" is having the same date issue where the entry has a date, but the displayed date is the day before. Example: The first entry has a date set to 11/26/2025, but on the card that is displayed here it shows 11/25/2025.
 
 ## Clients:
 
@@ -50,7 +51,75 @@
 - ✅ I would like to add a save/discard bar at the top every where we have a form, kind of like how Shopify does it for their dashboard. So if any changes have been made to a new or existing item, it would trigger to show this toast or banner, and you can't do anything (back out, navigate away, etc) until you either discard your changes or save them.
 - ✅ I would like to add modals on actions (Sending email, every delete action, etc) so actions don't get accidentally triggered if the user accidentally clicks on the action.
 - ⚠️ Update all input fields to use HeadlessUI components.
+- ✅ MVP Launch readiness implemented (security fixes, pricing update, password reset, phone auth groundwork, error handling)
 
 ## Line Item Templates
 
 - ✅ Line Item Templates: Can we make this more like Clients, Invoices, Expenses - where instead of a form that appears on the DOM to add, or a modal when you're editing, the template would live on a dedicated route?
+
+---
+
+# Future Improvements
+
+## Legal Pages (Required before public marketing)
+- [ ] Privacy Policy page
+- [ ] Terms of Service page
+- [ ] Cookie Policy page (if using analytics)
+
+## Authentication Enhancements
+
+### Google OAuth Setup
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project or select existing
+3. Go to APIs & Services > Credentials
+4. Create OAuth 2.0 Client ID (Web application)
+5. Add authorized redirect URI: `https://YOUR_SUPABASE_PROJECT.supabase.co/auth/v1/callback`
+6. Copy Client ID and Client Secret
+7. In Supabase Dashboard > Authentication > Providers > Google:
+   - Enable Google provider
+   - Paste Client ID and Client Secret
+8. Update login page to add Google sign-in button
+
+### Apple Sign-In Setup
+1. Go to [Apple Developer Portal](https://developer.apple.com/)
+2. Create an App ID with Sign in with Apple enabled
+3. Create a Services ID for web authentication
+4. Create a private key for Sign in with Apple
+5. In Supabase Dashboard > Authentication > Providers > Apple:
+   - Enable Apple provider
+   - Add Service ID, Team ID, Key ID, and Private Key
+   - Set authorized domains
+6. Update login page to add Apple sign-in button
+
+### SMS/Phone Authentication
+- Phone auth routes already created (`login-phone.tsx`)
+- In Supabase Dashboard > Authentication > Providers > Phone:
+  - Enable Phone provider
+  - Configure SMS provider (Twilio recommended)
+  - Add Twilio Account SID, Auth Token, and Phone Number
+- Test with real phone numbers
+
+## Dashboard Features
+- [ ] Logo upload in business settings
+- [ ] Mileage rate configuration (currently hardcoded $0.67)
+- [ ] Email template customization in settings
+- [ ] Chart visualizations in reports (line charts, pie charts)
+- [ ] Year-over-year comparisons in reports
+- [ ] Household settings: flexible monthly items list with auto-suggest on expenses
+
+## Infrastructure
+- [ ] Rate limiting on auth endpoints
+- [ ] Security headers (CSP, HSTS)
+- [ ] Error monitoring (Sentry)
+- [ ] Structured logging
+- [ ] Status page for uptime claims
+- [ ] Database backups and monitoring
+
+## Marketing & Landing Page
+- [ ] Real testimonials/case studies
+- [ ] Blog/resources section for SEO
+- [ ] Detailed feature pages
+- [ ] FAQ page
+- [ ] Contact form
+- [ ] Social media profiles and links
+- [ ] Email newsletter signup

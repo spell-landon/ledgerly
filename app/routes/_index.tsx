@@ -1,6 +1,6 @@
 import type { MetaFunction } from "@remix-run/node";
 import { Link } from "@remix-run/react";
-import { FileText, Receipt, BarChart3, CheckCircle, Users, Car, Calculator, Mail, ArrowRight } from "lucide-react";
+import { Receipt, BarChart3, CheckCircle, Users, Car, Calculator, Mail, ArrowRight } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 
@@ -18,7 +18,7 @@ export default function Index() {
       <header className="sticky top-0 z-50 border-b bg-white/80 backdrop-blur-md">
         <div className="container mx-auto flex h-16 items-center justify-between px-6">
           <Link to="/" className="flex items-center gap-2">
-            <FileText className="h-6 w-6 text-primary" />
+            <img src="/favicon.svg" alt="Figurely" className="h-8 w-8" />
             <span className="text-xl font-bold">Figurely</span>
           </Link>
           <nav className="hidden items-center gap-6 md:flex">
@@ -60,14 +60,14 @@ export default function Index() {
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link to="/signup">
                 <Button size="lg" className="h-12 px-8 text-base">
-                  Create account
+                  Start for free
                 </Button>
               </Link>
-              <Link to="#contact">
+              <a href="#pricing">
                 <Button size="lg" variant="outline" className="h-12 px-8 text-base">
-                  Book a call
+                  View pricing
                 </Button>
-              </Link>
+              </a>
             </div>
           </div>
 
@@ -156,35 +156,35 @@ export default function Index() {
           </div>
 
           <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-3">
-            {/* Hobby Plan */}
+            {/* Free Plan */}
             <div className="rounded-2xl border border-neutral-200 bg-white p-8 dark:border-neutral-800 dark:bg-neutral-900">
-              <h3 className="text-2xl font-bold dark:text-white">Hobby</h3>
-              <p className="mt-2 text-neutral-600 dark:text-neutral-400">For side projects</p>
+              <h3 className="text-2xl font-bold dark:text-white">Free</h3>
+              <p className="mt-2 text-neutral-600 dark:text-neutral-400">For getting started</p>
               <div className="mt-6">
-                <span className="text-5xl font-bold dark:text-white">$99</span>
+                <span className="text-5xl font-bold dark:text-white">$0</span>
                 <span className="text-neutral-600 dark:text-neutral-400">/month</span>
               </div>
               <ul className="mt-8 space-y-4">
                 <li className="flex items-center gap-3 text-neutral-600 dark:text-neutral-400">
                   <CheckCircle className="h-5 w-5 flex-shrink-0 text-neutral-900 dark:text-neutral-100" />
-                  Up to 10 invoices/month
+                  3 invoices per month
                 </li>
                 <li className="flex items-center gap-3 text-neutral-600 dark:text-neutral-400">
                   <CheckCircle className="h-5 w-5 flex-shrink-0 text-neutral-900 dark:text-neutral-100" />
-                  Basic expense tracking
+                  10 expenses per month
                 </li>
                 <li className="flex items-center gap-3 text-neutral-600 dark:text-neutral-400">
                   <CheckCircle className="h-5 w-5 flex-shrink-0 text-neutral-900 dark:text-neutral-100" />
-                  5 clients maximum
+                  1 client
                 </li>
                 <li className="flex items-center gap-3 text-neutral-600 dark:text-neutral-400">
                   <CheckCircle className="h-5 w-5 flex-shrink-0 text-neutral-900 dark:text-neutral-100" />
-                  Email support
+                  Basic reports
                 </li>
               </ul>
               <Link to="/signup" className="mt-8 block">
                 <Button variant="outline" className="w-full" size="lg">
-                  Get started
+                  Get started free
                 </Button>
               </Link>
             </div>
@@ -197,9 +197,9 @@ export default function Index() {
                 </span>
               </div>
               <h3 className="text-2xl font-bold dark:text-white">Starter</h3>
-              <p className="mt-2 text-neutral-600 dark:text-neutral-400">For freelancers</p>
+              <p className="mt-2 text-neutral-600 dark:text-neutral-400">For solo freelancers</p>
               <div className="mt-6">
-                <span className="text-5xl font-bold dark:text-white">$299</span>
+                <span className="text-5xl font-bold dark:text-white">$12</span>
                 <span className="text-neutral-600 dark:text-neutral-400">/month</span>
               </div>
               <ul className="mt-8 space-y-4">
@@ -209,19 +209,19 @@ export default function Index() {
                 </li>
                 <li className="flex items-center gap-3 text-neutral-600 dark:text-neutral-400">
                   <CheckCircle className="h-5 w-5 flex-shrink-0 text-neutral-900 dark:text-neutral-100" />
-                  Advanced expense tracking
+                  Unlimited expenses
                 </li>
                 <li className="flex items-center gap-3 text-neutral-600 dark:text-neutral-400">
                   <CheckCircle className="h-5 w-5 flex-shrink-0 text-neutral-900 dark:text-neutral-100" />
-                  Unlimited clients
+                  25 clients
                 </li>
                 <li className="flex items-center gap-3 text-neutral-600 dark:text-neutral-400">
                   <CheckCircle className="h-5 w-5 flex-shrink-0 text-neutral-900 dark:text-neutral-100" />
-                  Financial reports
+                  PDF exports
                 </li>
                 <li className="flex items-center gap-3 text-neutral-600 dark:text-neutral-400">
                   <CheckCircle className="h-5 w-5 flex-shrink-0 text-neutral-900 dark:text-neutral-100" />
-                  Priority support
+                  Email support
                 </li>
               </ul>
               <Link to="/signup" className="mt-8 block">
@@ -234,9 +234,9 @@ export default function Index() {
             {/* Pro Plan */}
             <div className="rounded-2xl border border-neutral-200 bg-white p-8 dark:border-neutral-800 dark:bg-neutral-900">
               <h3 className="text-2xl font-bold dark:text-white">Pro</h3>
-              <p className="mt-2 text-neutral-600 dark:text-neutral-400">For growing teams</p>
+              <p className="mt-2 text-neutral-600 dark:text-neutral-400">For growing businesses</p>
               <div className="mt-6">
-                <span className="text-5xl font-bold dark:text-white">$1490</span>
+                <span className="text-5xl font-bold dark:text-white">$29</span>
                 <span className="text-neutral-600 dark:text-neutral-400">/month</span>
               </div>
               <ul className="mt-8 space-y-4">
@@ -246,19 +246,19 @@ export default function Index() {
                 </li>
                 <li className="flex items-center gap-3 text-neutral-600 dark:text-neutral-400">
                   <CheckCircle className="h-5 w-5 flex-shrink-0 text-neutral-900 dark:text-neutral-100" />
-                  Multi-user access
+                  Unlimited clients
                 </li>
                 <li className="flex items-center gap-3 text-neutral-600 dark:text-neutral-400">
                   <CheckCircle className="h-5 w-5 flex-shrink-0 text-neutral-900 dark:text-neutral-100" />
-                  Advanced tax reporting
+                  Tax reports & deductions
                 </li>
                 <li className="flex items-center gap-3 text-neutral-600 dark:text-neutral-400">
                   <CheckCircle className="h-5 w-5 flex-shrink-0 text-neutral-900 dark:text-neutral-100" />
-                  API access
+                  Mileage tracking
                 </li>
                 <li className="flex items-center gap-3 text-neutral-600 dark:text-neutral-400">
                   <CheckCircle className="h-5 w-5 flex-shrink-0 text-neutral-900 dark:text-neutral-100" />
-                  Dedicated support
+                  Priority support
                 </li>
               </ul>
               <Link to="/signup" className="mt-8 block">
@@ -276,29 +276,19 @@ export default function Index() {
         <div className="container mx-auto">
           <div className="mx-auto max-w-4xl text-center">
             <h2 className="mb-6 text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl dark:text-white">
-              Host your invoices with zero friction today
+              Ready to simplify your finances?
             </h2>
             <p className="mb-10 text-lg text-neutral-600 sm:text-xl dark:text-neutral-400">
-              Join 27,000+ freelancers and businesses managing their finances with Figurely.
-              99.9% uptime guaranteed. Available 24/7.
+              Join freelancers and small businesses who save hours every week on invoicing and expense tracking.
+              Start free today—no credit card required.
             </p>
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link to="/signup">
                 <Button size="lg" className="h-12 px-8 text-base">
-                  Create account
+                  Start for free
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
-            </div>
-            <div className="mt-10 flex items-center justify-center gap-2">
-              <div className="flex -space-x-2">
-                <div className="h-10 w-10 rounded-full border-2 border-white bg-neutral-300 dark:border-neutral-900"></div>
-                <div className="h-10 w-10 rounded-full border-2 border-white bg-neutral-400 dark:border-neutral-900"></div>
-                <div className="h-10 w-10 rounded-full border-2 border-white bg-neutral-300 dark:border-neutral-900"></div>
-                <div className="h-10 w-10 rounded-full border-2 border-white bg-neutral-400 dark:border-neutral-900"></div>
-              </div>
-              <p className="ml-3 text-sm text-neutral-600 dark:text-neutral-400">
-                Trusted by 27,000+ developers
-              </p>
             </div>
           </div>
         </div>
@@ -312,11 +302,11 @@ export default function Index() {
         </div>
 
         <div className="container relative mx-auto">
-          <div className="grid gap-12 md:grid-cols-4">
+          <div className="grid gap-12 md:grid-cols-3">
             {/* Pages */}
             <div>
               <h3 className="mb-6 text-sm font-semibold uppercase tracking-wider text-neutral-900 dark:text-neutral-100">
-                Pages
+                Product
               </h3>
               <ul className="space-y-3">
                 <li>
@@ -342,30 +332,6 @@ export default function Index() {
               </ul>
             </div>
 
-            {/* Socials */}
-            <div>
-              <h3 className="mb-6 text-sm font-semibold uppercase tracking-wider text-neutral-900 dark:text-neutral-100">
-                Socials
-              </h3>
-              <ul className="space-y-3">
-                <li>
-                  <a href="#" className="text-neutral-600 transition-colors hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100">
-                    Twitter
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-neutral-600 transition-colors hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100">
-                    LinkedIn
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-neutral-600 transition-colors hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100">
-                    GitHub
-                  </a>
-                </li>
-              </ul>
-            </div>
-
             {/* Legal */}
             <div>
               <h3 className="mb-6 text-sm font-semibold uppercase tracking-wider text-neutral-900 dark:text-neutral-100">
@@ -373,19 +339,14 @@ export default function Index() {
               </h3>
               <ul className="space-y-3">
                 <li>
-                  <a href="#" className="text-neutral-600 transition-colors hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100">
-                    Privacy Policy
-                  </a>
+                  <span className="text-neutral-400 dark:text-neutral-600">
+                    Privacy Policy <span className="text-xs">(Coming soon)</span>
+                  </span>
                 </li>
                 <li>
-                  <a href="#" className="text-neutral-600 transition-colors hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100">
-                    Terms of Service
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-neutral-600 transition-colors hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100">
-                    Cookie Policy
-                  </a>
+                  <span className="text-neutral-400 dark:text-neutral-600">
+                    Terms of Service <span className="text-xs">(Coming soon)</span>
+                  </span>
                 </li>
               </ul>
             </div>
@@ -400,7 +361,7 @@ export default function Index() {
               </p>
               <Link to="/signup">
                 <Button className="w-full">
-                  Create account
+                  Create free account
                 </Button>
               </Link>
             </div>

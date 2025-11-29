@@ -77,7 +77,15 @@ export default function Login() {
               />
             </div>
             <div className="space-y-2">
-              <FieldLabel htmlFor="password" label="Password" required />
+              <div className="flex items-center justify-between">
+                <FieldLabel htmlFor="password" label="Password" required />
+                <Link
+                  to="/forgot-password"
+                  className="text-sm text-primary hover:underline"
+                >
+                  Forgot password?
+                </Link>
+              </div>
               <Input
                 id="password"
                 name="password"
@@ -95,6 +103,19 @@ export default function Login() {
             >
               {isSubmitting ? "Signing in..." : "Sign In"}
             </Button>
+            <div className="relative w-full">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-white px-2 text-muted-foreground">Or</span>
+              </div>
+            </div>
+            <Link to="/login-phone" className="w-full">
+              <Button variant="outline" className="w-full">
+                Sign in with phone
+              </Button>
+            </Link>
             <p className="text-center text-sm text-muted-foreground">
               Don't have an account?{" "}
               <Link to="/signup" className="text-primary hover:underline">

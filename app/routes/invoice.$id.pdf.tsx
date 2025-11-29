@@ -12,10 +12,12 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   }
 
   // Fetch invoice data using service role (bypasses RLS for public access)
+  // Only allow access if invoice has a share_token (publicly shared)
   const { data: invoice, error } = await supabase
     .from("invoices")
     .select("*")
     .eq("id", id)
+    .not("share_token", "is", null)
     .single();
 
   if (error || !invoice) {

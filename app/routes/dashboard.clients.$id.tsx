@@ -1,13 +1,17 @@
 import {
   json,
+  redirect,
   type LoaderFunctionArgs,
   type MetaFunction,
+  type ActionFunctionArgs,
 } from '@remix-run/node';
-import { Link, useLoaderData } from '@remix-run/react';
-import { ArrowLeft, Edit, Mail, Phone, Globe, MapPin, FileText, Building2 } from 'lucide-react';
+import { Link, useLoaderData, Form, useNavigation } from '@remix-run/react';
+import { ArrowLeft, Edit, Mail, Phone, Globe, MapPin, FileText, Building2, Trash2 } from 'lucide-react';
+import { useState } from 'react';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card';
 import { Badge } from '~/components/ui/badge';
+import { ConfirmDialog } from '~/components/ui/confirm-dialog';
 import { requireAuth } from '~/lib/auth.server';
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
@@ -61,8 +65,38 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   );
 }
 
+export async function action({ request, params }: ActionFunctionArgs) {
+  const { session, supabase, headers } = await requireAuth(request);
+  const { id } = params;
+  const formData = await request.formData();
+  const intent = formData.get('intent');
+
+  if (!id) {
+    throw new Response('Client ID required', { status: 400 });
+  }
+
+  if (intent === 'delete') {
+    const { error } = await supabase
+      .from('clients')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', session.user.id);
+
+    if (error) {
+      return json({ error: error.message }, { status: 400, headers });
+    }
+
+    return redirect('/dashboard/clients', { headers });
+  }
+
+  return json({ error: 'Invalid action' }, { status: 400, headers });
+}
+
 export default function ClientDetail() {
   const { client, invoicesCount } = useLoaderData<typeof loader>();
+  const navigation = useNavigation();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const isDeleting = navigation.state === 'submitting' && navigation.formData?.get('intent') === 'delete';
 
   return (
     <div className='container mx-auto space-y-4 p-4 md:space-y-6 md:p-6'>
@@ -84,13 +118,43 @@ export default function ClientDetail() {
             </p>
           </div>
         </div>
-        <Link to={`/dashboard/clients/${client.id}/edit`}>
-          <Button>
-            <Edit className='mr-2 h-4 w-4' />
-            Edit Client
+        <div className='flex items-center gap-2'>
+          <Link to={`/dashboard/clients/${client.id}/edit`}>
+            <Button>
+              <Edit className='mr-2 h-4 w-4' />
+              Edit Client
+            </Button>
+          </Link>
+          <Button
+            variant='destructive'
+            onClick={() => setShowDeleteDialog(true)}
+            disabled={isDeleting}>
+            <Trash2 className='mr-2 h-4 w-4' />
+            {isDeleting ? 'Deleting...' : 'Delete'}
           </Button>
-        </Link>
+        </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={showDeleteDialog}
+        onClose={() => setShowDeleteDialog(false)}
+        title='Delete Client'
+        description={`Are you sure you want to delete "${client.name}"? This action cannot be undone.`}>
+        <Form method='post'>
+          <input type='hidden' name='intent' value='delete' />
+          <div className='flex justify-end gap-2'>
+            <Button
+              type='button'
+              variant='outline'
+              onClick={() => setShowDeleteDialog(false)}>
+              Cancel
+            </Button>
+            <Button type='submit' variant='destructive' disabled={isDeleting}>
+              {isDeleting ? 'Deleting...' : 'Delete Client'}
+            </Button>
+          </div>
+        </Form>
+      </ConfirmDialog>
 
       <div className='grid gap-4 md:gap-6 md:grid-cols-3'>
         {/* Main Information */}

@@ -75,3 +75,61 @@ export async function signOut(request: Request) {
 
   return redirect("/login", { headers });
 }
+
+export async function resetPasswordForEmail(request: Request, email: string) {
+  const { supabase, headers } = createSupabaseServerClient(request);
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${new URL(request.url).origin}/reset-password`,
+  });
+
+  if (error) {
+    return { error: error.message, headers };
+  }
+
+  return { success: true, headers };
+}
+
+export async function updatePassword(request: Request, newPassword: string) {
+  const { supabase, headers } = createSupabaseServerClient(request);
+
+  const { error } = await supabase.auth.updateUser({
+    password: newPassword,
+  });
+
+  if (error) {
+    return { error: error.message, headers };
+  }
+
+  return { success: true, headers };
+}
+
+export async function signInWithPhone(request: Request, phone: string) {
+  const { supabase, headers } = createSupabaseServerClient(request);
+
+  const { error } = await supabase.auth.signInWithOtp({
+    phone,
+  });
+
+  if (error) {
+    return { error: error.message, headers };
+  }
+
+  return { success: true, headers };
+}
+
+export async function verifyPhoneOtp(request: Request, phone: string, token: string) {
+  const { supabase, headers } = createSupabaseServerClient(request);
+
+  const { data, error } = await supabase.auth.verifyOtp({
+    phone,
+    token,
+    type: "sms",
+  });
+
+  if (error) {
+    return { error: error.message, headers };
+  }
+
+  return { data, headers };
+}
