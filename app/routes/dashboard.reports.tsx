@@ -4,6 +4,7 @@ import {
   type MetaFunction,
 } from '@remix-run/node';
 import { useLoaderData, useSearchParams, Link } from '@remix-run/react';
+import { useState } from 'react';
 import {
   Calendar,
   Download,
@@ -12,6 +13,7 @@ import {
   DollarSign,
   Receipt,
   FileText,
+  Eye,
 } from 'lucide-react';
 import { Button } from '~/components/ui/button';
 import {
@@ -47,8 +49,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const endDate =
     url.searchParams.get('endDate') || new Date().toISOString().split('T')[0];
 
-  // Fetch all invoices and expenses in date range
-  const [invoicesResult, expensesResult] = await Promise.all([
+  // Fetch all invoices and expenses in date range AND all-time for period detection
+  const [invoicesResult, expensesResult, allInvoicesResult, allExpensesResult] = await Promise.all([
     supabase
       .from('invoices')
       .select('*')
@@ -63,10 +65,92 @@ export async function loader({ request }: LoaderFunctionArgs) {
       .gte('date', startDate)
       .lte('date', endDate)
       .order('date', { ascending: true }),
+    // Get all invoices for period detection
+    supabase
+      .from('invoices')
+      .select('date')
+      .eq('user_id', session.user.id)
+      .order('date', { ascending: false }),
+    // Get all expenses for period detection
+    supabase
+      .from('expenses')
+      .select('date')
+      .eq('user_id', session.user.id)
+      .order('date', { ascending: false }),
   ]);
 
   const invoices = invoicesResult.data || [];
   const expenses = expensesResult.data || [];
+  const allInvoices = allInvoicesResult.data || [];
+  const allExpenses = allExpensesResult.data || [];
+
+  // Detect periods with data
+  const allDates = [
+    ...allInvoices.map((inv) => inv.date),
+    ...allExpenses.map((exp) => exp.date),
+  ].filter(Boolean);
+
+  const monthsSet = new Set<string>();
+  const quartersSet = new Set<string>();
+  const yearsSet = new Set<string>();
+
+  allDates.forEach((dateStr) => {
+    const date = new Date(dateStr);
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const quarter = Math.floor(month / 3) + 1;
+
+    monthsSet.add(`${year}-${String(month + 1).padStart(2, '0')}`);
+    quartersSet.add(`${year}-Q${quarter}`);
+    yearsSet.add(String(year));
+  });
+
+  // Convert to sorted arrays with display labels and date ranges
+  const availablePeriods = {
+    monthly: Array.from(monthsSet)
+      .sort((a, b) => b.localeCompare(a))
+      .slice(0, 24) // Last 24 months
+      .map((key) => {
+        const [year, month] = key.split('-');
+        const startOfMonth = new Date(parseInt(year), parseInt(month) - 1, 1);
+        const endOfMonth = new Date(parseInt(year), parseInt(month), 0);
+        return {
+          key,
+          label: startOfMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+          startDate: startOfMonth.toISOString().split('T')[0],
+          endDate: endOfMonth.toISOString().split('T')[0],
+        };
+      }),
+    quarterly: Array.from(quartersSet)
+      .sort((a, b) => b.localeCompare(a))
+      .slice(0, 12) // Last 12 quarters
+      .map((key) => {
+        const [year, q] = key.split('-Q');
+        const quarter = parseInt(q);
+        const startMonth = (quarter - 1) * 3;
+        const startOfQuarter = new Date(parseInt(year), startMonth, 1);
+        const endOfQuarter = new Date(parseInt(year), startMonth + 3, 0);
+        return {
+          key,
+          label: `Q${quarter} ${year}`,
+          startDate: startOfQuarter.toISOString().split('T')[0],
+          endDate: endOfQuarter.toISOString().split('T')[0],
+        };
+      }),
+    yearly: Array.from(yearsSet)
+      .sort((a, b) => b.localeCompare(a))
+      .slice(0, 10) // Last 10 years
+      .map((year) => {
+        const startOfYear = new Date(parseInt(year), 0, 1);
+        const endOfYear = new Date(parseInt(year), 11, 31);
+        return {
+          key: year,
+          label: year,
+          startDate: startOfYear.toISOString().split('T')[0],
+          endDate: endOfYear.toISOString().split('T')[0],
+        };
+      }),
+  };
 
   // Calculate invoice stats by status
   const invoicesByStatus = {
@@ -165,6 +249,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
         ...data,
         profit: data.income - data.expenses,
       })),
+      availablePeriods,
       startDate,
       endDate,
     },
@@ -194,10 +279,12 @@ export default function Reports() {
     expensesByCategory,
     paymentMethods,
     monthlyData,
+    availablePeriods,
     startDate,
     endDate,
   } = useLoaderData<typeof loader>();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [selectedPeriodType, setSelectedPeriodType] = useState<'monthly' | 'quarterly' | 'yearly'>('monthly');
 
   const handleDateChange = (field: string, value: string) => {
     const params = new URLSearchParams(searchParams);
@@ -705,6 +792,71 @@ export default function Reports() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Period Reports */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Download Reports by Period</CardTitle>
+          <CardDescription>
+            Download or view reports for specific time periods
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {/* Period Type Tabs */}
+          <div className='flex gap-2 mb-4'>
+            {(['monthly', 'quarterly', 'yearly'] as const).map((type) => (
+              <Button
+                key={type}
+                variant={selectedPeriodType === type ? 'default' : 'outline'}
+                size='sm'
+                onClick={() => setSelectedPeriodType(type)}
+                className='capitalize'>
+                {type}
+              </Button>
+            ))}
+          </div>
+
+          {/* Period List */}
+          {availablePeriods[selectedPeriodType].length === 0 ? (
+            <p className='py-8 text-center text-sm text-muted-foreground'>
+              No data available for {selectedPeriodType} reports
+            </p>
+          ) : (
+            <div className='divide-y'>
+              {availablePeriods[selectedPeriodType].map((period) => (
+                <div
+                  key={period.key}
+                  className='flex items-center justify-between py-3'>
+                  <span className='font-medium'>{period.label}</span>
+                  <div className='flex gap-2'>
+                    <Button
+                      variant='outline'
+                      size='sm'
+                      asChild>
+                      <Link
+                        to={`/dashboard/reports?startDate=${period.startDate}&endDate=${period.endDate}`}>
+                        <Eye className='h-4 w-4 mr-1' />
+                        View
+                      </Link>
+                    </Button>
+                    <Button
+                      variant='outline'
+                      size='sm'
+                      asChild>
+                      <a
+                        href={`/dashboard/reports/pdf?startDate=${period.startDate}&endDate=${period.endDate}`}
+                        download>
+                        <Download className='h-4 w-4 mr-1' />
+                        PDF
+                      </a>
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

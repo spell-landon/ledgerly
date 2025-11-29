@@ -1,6 +1,7 @@
 import { json, type LoaderFunctionArgs, type MetaFunction } from "@remix-run/node";
 import { useLoaderData, useSearchParams, Link } from "@remix-run/react";
-import { Calendar, Download, DollarSign, Receipt, Car, Home, FileText } from "lucide-react";
+import { useState } from "react";
+import { Calendar, Download, DollarSign, Receipt, Car, Home, FileText, Eye } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
@@ -23,8 +24,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const startDate = url.searchParams.get("startDate") || new Date(new Date().getFullYear(), 0, 1).toISOString().split('T')[0];
   const endDate = url.searchParams.get("endDate") || new Date().toISOString().split('T')[0];
 
-  // Fetch all data in date range
-  const [invoicesResult, expensesResult, mileageResult] = await Promise.all([
+  // Fetch all data in date range AND all-time for period detection
+  const [invoicesResult, expensesResult, mileageResult, allInvoicesResult, allExpensesResult, allMileageResult] = await Promise.all([
     supabase
       .from("invoices")
       .select("*")
@@ -43,11 +44,99 @@ export async function loader({ request }: LoaderFunctionArgs) {
       .eq("user_id", session.user.id)
       .gte("date", startDate)
       .lte("date", endDate),
+    // Get all data for period detection
+    supabase
+      .from("invoices")
+      .select("date")
+      .eq("user_id", session.user.id)
+      .order("date", { ascending: false }),
+    supabase
+      .from("expenses")
+      .select("date")
+      .eq("user_id", session.user.id)
+      .order("date", { ascending: false }),
+    supabase
+      .from("mileage")
+      .select("date")
+      .eq("user_id", session.user.id)
+      .order("date", { ascending: false }),
   ]);
 
   const invoices = invoicesResult.data || [];
   const expenses = expensesResult.data || [];
   const mileage = mileageResult.data || [];
+  const allInvoices = allInvoicesResult.data || [];
+  const allExpenses = allExpensesResult.data || [];
+  const allMileage = allMileageResult.data || [];
+
+  // Detect periods with data
+  const allDates = [
+    ...allInvoices.map((inv) => inv.date),
+    ...allExpenses.map((exp) => exp.date),
+    ...allMileage.map((m) => m.date),
+  ].filter(Boolean);
+
+  const monthsSet = new Set<string>();
+  const quartersSet = new Set<string>();
+  const yearsSet = new Set<string>();
+
+  allDates.forEach((dateStr) => {
+    const date = new Date(dateStr);
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const quarter = Math.floor(month / 3) + 1;
+
+    monthsSet.add(`${year}-${String(month + 1).padStart(2, '0')}`);
+    quartersSet.add(`${year}-Q${quarter}`);
+    yearsSet.add(String(year));
+  });
+
+  // Convert to sorted arrays with display labels and date ranges
+  const availablePeriods = {
+    monthly: Array.from(monthsSet)
+      .sort((a, b) => b.localeCompare(a))
+      .slice(0, 24)
+      .map((key) => {
+        const [year, month] = key.split('-');
+        const startOfMonth = new Date(parseInt(year), parseInt(month) - 1, 1);
+        const endOfMonth = new Date(parseInt(year), parseInt(month), 0);
+        return {
+          key,
+          label: startOfMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+          startDate: startOfMonth.toISOString().split('T')[0],
+          endDate: endOfMonth.toISOString().split('T')[0],
+        };
+      }),
+    quarterly: Array.from(quartersSet)
+      .sort((a, b) => b.localeCompare(a))
+      .slice(0, 12)
+      .map((key) => {
+        const [year, q] = key.split('-Q');
+        const quarter = parseInt(q);
+        const startMonth = (quarter - 1) * 3;
+        const startOfQuarter = new Date(parseInt(year), startMonth, 1);
+        const endOfQuarter = new Date(parseInt(year), startMonth + 3, 0);
+        return {
+          key,
+          label: `Q${quarter} ${year}`,
+          startDate: startOfQuarter.toISOString().split('T')[0],
+          endDate: endOfQuarter.toISOString().split('T')[0],
+        };
+      }),
+    yearly: Array.from(yearsSet)
+      .sort((a, b) => b.localeCompare(a))
+      .slice(0, 10)
+      .map((year) => {
+        const startOfYear = new Date(parseInt(year), 0, 1);
+        const endOfYear = new Date(parseInt(year), 11, 31);
+        return {
+          key: year,
+          label: year,
+          startDate: startOfYear.toISOString().split('T')[0],
+          endDate: endOfYear.toISOString().split('T')[0],
+        };
+      }),
+  };
 
   // Calculate income (paid invoices only)
   const totalIncome = invoices
@@ -97,6 +186,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
       mileageRecordCount: mileage.length,
     },
     expensesByCategory,
+    availablePeriods,
     startDate,
     endDate,
   }, { headers });
@@ -122,8 +212,9 @@ function formatTaxCategory(category: string) {
 }
 
 export default function TaxReport() {
-  const { stats, expensesByCategory, startDate, endDate } = useLoaderData<typeof loader>();
+  const { stats, expensesByCategory, availablePeriods, startDate, endDate } = useLoaderData<typeof loader>();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [selectedPeriodType, setSelectedPeriodType] = useState<'monthly' | 'quarterly' | 'yearly'>('monthly');
 
   const handleDateChange = (field: string, value: string) => {
     const params = new URLSearchParams(searchParams);
@@ -340,6 +431,71 @@ export default function TaxReport() {
               deductions, credits, and tax bracket. Please consult with a tax professional.
             </p>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Period Tax Reports */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Download Tax Reports by Period</CardTitle>
+          <CardDescription>
+            Download or view tax reports for specific time periods
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {/* Period Type Tabs */}
+          <div className="flex gap-2 mb-4">
+            {(['monthly', 'quarterly', 'yearly'] as const).map((type) => (
+              <Button
+                key={type}
+                variant={selectedPeriodType === type ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setSelectedPeriodType(type)}
+                className="capitalize">
+                {type}
+              </Button>
+            ))}
+          </div>
+
+          {/* Period List */}
+          {availablePeriods[selectedPeriodType].length === 0 ? (
+            <p className="py-8 text-center text-sm text-muted-foreground">
+              No data available for {selectedPeriodType} reports
+            </p>
+          ) : (
+            <div className="divide-y">
+              {availablePeriods[selectedPeriodType].map((period) => (
+                <div
+                  key={period.key}
+                  className="flex items-center justify-between py-3">
+                  <span className="font-medium">{period.label}</span>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      asChild>
+                      <Link
+                        to={`/dashboard/tax-report?startDate=${period.startDate}&endDate=${period.endDate}`}>
+                        <Eye className="h-4 w-4 mr-1" />
+                        View
+                      </Link>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      asChild>
+                      <a
+                        href={`/dashboard/tax-report/pdf?startDate=${period.startDate}&endDate=${period.endDate}`}
+                        download>
+                        <Download className="h-4 w-4 mr-1" />
+                        PDF
+                      </a>
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
